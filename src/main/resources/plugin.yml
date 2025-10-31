@@ -1,0 +1,30 @@
+name: DeathChest
+version: 1.0.0
+main: com.flyaway.deathchest.DeathChest
+api-version: 1.21
+author: FlyAwayMaking
+website: https://github.com/flyawaymaking
+description: Плагин, помещающий предметы игрока при смерти в сундук
+
+commands:
+  deathchest:
+    description: Управление сундуками смерти
+    usage: /<command> [list|reload|version|help]
+    aliases: [dchest]
+
+permissions:
+  deathchest.*:
+    description: Все права DeathChest
+    children:
+      deathchest.use: true
+      deathchest.reload: true
+      deathchest.admin: true
+  deathchest.use:
+    description: Используйте функции сундука смерти
+    default: true
+  deathchest.reload:
+    description: Перезагрузите конфигурацию плагина
+    default: op
+  deathchest.admin:
+    description: Права админа
+    default: op
