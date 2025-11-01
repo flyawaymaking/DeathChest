@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.flyaway.deathchest'
-version = '1.0.0'
+version = '1.0.1'
 
 java {
     toolchain {
@@ -17,10 +17,15 @@ repositories {
         name = "papermc"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven {
+      name = "jitpack"
+      url = "https://jitpack.io/"
+    }
 }
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT'
+    compileOnly 'com.github.decentsoftware-eu:decentholograms:2.9.7'
 }
 
 tasks.jar {

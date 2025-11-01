@@ -1,10 +1,12 @@
 name: DeathChest
-version: 1.0.0
+version: 1.0.1
 main: com.flyaway.deathchest.DeathChest
 api-version: 1.21
 author: FlyAwayMaking
 website: https://github.com/flyawaymaking
 description: Плагин, помещающий предметы игрока при смерти в сундук
+softdepend:
+  - DecentHolograms
 
 commands:
   deathchest:
