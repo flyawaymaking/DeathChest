@@ -39,13 +39,7 @@ public class DeathChest extends JavaPlugin {
         chestManager.loadChests();
 
         // Запускаем периодическую задачу
-        this.scheduledTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                chestManager.runScheduledTasks();
-            }
-        };
-        this.scheduledTask.runTaskTimer(this, 6000L, 6000L); // 5 минут
+        runScheduledTask();
 
         getLogger().info("DeathChest был включен!");
     }
@@ -60,6 +54,31 @@ public class DeathChest extends JavaPlugin {
         // Final save chest data and disable chests
         chestManager.disableChests();
         getLogger().info("DeathChest был выключен!");
+    }
+
+    private void runScheduledTask() {
+        this.scheduledTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                chestManager.runScheduledTasks();
+            }
+        };
+        this.scheduledTask.runTaskTimer(this, 6000L, 6000L); // 5 минут
+    }
+
+    public void reloadConfiguration() {
+        // Отменяем задачу если она запущена
+        if (scheduledTask != null && !scheduledTask.isCancelled()) {
+            scheduledTask.cancel();
+        }
+
+        configManager.reloadConfig();
+        chestManager.reloadChests();
+        hologramManager.reload();
+
+        runScheduledTask();
+
+        getLogger().info("Конфигурация DeathChest перезагружена!");
     }
 
     public static DeathChest getInstance() {

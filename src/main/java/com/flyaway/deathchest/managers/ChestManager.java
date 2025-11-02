@@ -19,7 +19,6 @@ public class ChestManager {
     private final DeathChest plugin;
     private final Map<Location, DeathChestData> deathChests;
     private final File chestsFile;
-    private boolean needsSave = false;
 
     public ChestManager(DeathChest plugin) {
         this.plugin = plugin;
@@ -34,16 +33,18 @@ public class ChestManager {
         private final long creationTime;
         private final DeathChest plugin;
         private String hologramId; // ID голограммы
+        private final Location location; // Добавляем ссылку на местоположение
 
-        public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size) {
-            this(plugin, owner, ownerName, size, null);
+        public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size, Location location) {
+            this(plugin, owner, ownerName, size, null, location);
         }
 
-        public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size, String hologramId) {
+        public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size, String hologramId, Location location) {
             this.plugin = plugin;
             this.owner = owner;
             this.ownerName = ownerName;
             this.hologramId = hologramId;
+            this.location = location;
             String title = plugin.getConfigManager().getChestTitle().replace("{player}", ownerName);
             this.inventory = plugin.getServer().createInventory(null, size, title);
             this.creationTime = System.currentTimeMillis();
@@ -56,6 +57,7 @@ public class ChestManager {
         public long getCreationTime() { return creationTime; }
         public String getHologramId() { return hologramId; }
         public void setHologramId(String id) { this.hologramId = id; }
+        public Location getLocation() { return location; }
     }
 
     public boolean createDeathChest(Player player, List<ItemStack> items, Location location) {
@@ -70,7 +72,7 @@ public class ChestManager {
             block.setType(Material.CHEST);
 
             int size = Math.min(((items.size() + 8) / 9) * 9, 54);
-            DeathChestData deathChest = new DeathChestData(plugin, player.getUniqueId(), player.getName(), size);
+            DeathChestData deathChest = new DeathChestData(plugin, player.getUniqueId(), player.getName(), size, location);
 
             for (ItemStack item : items) {
                 if (item != null && item.getType() != Material.AIR) {
@@ -79,11 +81,15 @@ public class ChestManager {
             }
 
             deathChests.put(block.getLocation(), deathChest);
-            needsSave = true;
+
+            // Немедленно сохраняем новый сундук
+            saveDeathChest(deathChest);
 
             if (plugin.getConfigManager().showNameOnChest()) {
                 String hologramId = plugin.getHologramManager().createHologram(block.getLocation(), player.getName());
                 deathChest.setHologramId(hologramId);
+                // Сохраняем обновленные данные с hologramId
+                saveDeathChest(deathChest);
             }
 
             return true;
@@ -113,13 +119,57 @@ public class ChestManager {
         DeathChestData chest = deathChests.remove(location);
         if (chest != null) {
             location.getBlock().setType(Material.AIR);
-            needsSave = true;
+
+            // Удаляем из файла
+            removeDeathChestFromFile(location);
 
             // Удаляем голограмму
             if (chest.getHologramId() != null) {
                 plugin.getHologramManager().removeHologram(chest.getHologramId());
             }
         }
+    }
+
+    public void updateDeathChest(DeathChestData chest) {
+        // Сохраняем изменения в файл
+        saveDeathChest(chest);
+    }
+
+    private void saveDeathChest(DeathChestData chest) {
+        FileConfiguration config = YamlConfiguration.loadConfiguration(chestsFile);
+
+        String key = getLocationKey(chest.getLocation());
+
+        config.set(key + ".owner", chest.getOwner().toString());
+        config.set(key + ".ownerName", chest.getOwnerName());
+        config.set(key + ".creationTime", chest.getCreationTime());
+        config.set(key + ".items", Arrays.asList(chest.getInventory().getContents()));
+        config.set(key + ".hologramId", chest.getHologramId());
+
+        try {
+            config.save(chestsFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Не удалось сохранить сундук смерти: " + e.getMessage());
+        }
+    }
+
+    private void removeDeathChestFromFile(Location location) {
+        if (!chestsFile.exists()) return;
+
+        FileConfiguration config = YamlConfiguration.loadConfiguration(chestsFile);
+        String key = getLocationKey(location);
+
+        config.set(key, null);
+
+        try {
+            config.save(chestsFile);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Не удалось удалить сундук смерти из файла: " + e.getMessage());
+        }
+    }
+
+    private String getLocationKey(Location location) {
+        return location.getWorld().getName() + ";" + location.getBlockX() + ";" + location.getBlockY() + ";" + location.getBlockZ();
     }
 
     public void loadChests() {
@@ -154,12 +204,15 @@ public class ChestManager {
                 if (items == null) continue;
 
                 int size = Math.min(((items.size() + 8) / 9) * 9, 54);
-                DeathChestData chest = new DeathChestData(plugin, owner, ownerName, size, hologramId);
+                DeathChestData chest = new DeathChestData(plugin, owner, ownerName, size, hologramId, loc);
 
                 chest.getInventory().setContents(items.toArray(new ItemStack[0]));
                 deathChests.put(loc, chest);
-                if (plugin.getConfigManager().showNameOnChest()) {
-                    plugin.getHologramManager().createHologram(loc, ownerName);
+                if (plugin.getConfigManager().showNameOnChest() && chest.getHologramId() == null) {
+                    String newHologramId = plugin.getHologramManager().createHologram(loc, ownerName);
+                    chest.setHologramId(newHologramId);
+                    // Сохраняем обновленные данные с hologramId
+                    saveDeathChest(chest);
                 }
             } catch (Exception e) {
                 plugin.getLogger().warning("Ошибка при загрузке сундука смерти: " + key + " - " + e.getMessage());
@@ -167,33 +220,6 @@ public class ChestManager {
         }
 
         plugin.getLogger().info("Загружено " + deathChests.size() + " сундуков смерти");
-    }
-
-    public void saveChests() {
-        if (!needsSave && chestsFile.exists() && deathChests.isEmpty()) return;
-
-        FileConfiguration config = new YamlConfiguration();
-
-        for (Map.Entry<Location, DeathChestData> entry : deathChests.entrySet()) {
-            Location loc = entry.getKey();
-            DeathChestData chest = entry.getValue();
-
-            String key = loc.getWorld().getName() + ";" + loc.getBlockX() + ";" + loc.getBlockY() + ";" + loc.getBlockZ();
-
-            config.set(key + ".owner", chest.getOwner().toString());
-            config.set(key + ".ownerName", chest.getOwnerName());
-            config.set(key + ".creationTime", chest.getCreationTime());
-            config.set(key + ".items", Arrays.asList(chest.getInventory().getContents()));
-            config.set(key + ".hologramId", chest.getHologramId());
-        }
-
-        try {
-            config.save(chestsFile);
-            plugin.getLogger().info("Сохранено " + deathChests.size() + " сундуков смерти");
-            needsSave = false;
-        } catch (IOException e) {
-            plugin.getLogger().severe("Не удалось сохранить сундуки смерти: " + e.getMessage());
-        }
     }
 
     public Map<Location, DeathChestData> getDeathChests() {
@@ -220,12 +246,14 @@ public class ChestManager {
                 loc.getBlock().setType(Material.AIR);
                 iterator.remove();
 
+                // Удаляем из файла
+                removeDeathChestFromFile(loc);
+
                 if (chest.getHologramId() != null) {
                     plugin.getHologramManager().removeHologram(chest.getHologramId());
                 }
 
                 removedCount++;
-                needsSave = true;
             }
         }
 
@@ -236,23 +264,19 @@ public class ChestManager {
 
     public void runScheduledTasks() {
         cleanupExpiredChests();
-        if (needsSave) saveChests();
     }
 
     public void disableChests() {
         plugin.getLogger().info("Отключение сундуков смерти...");
 
-        // 1. Сохраняем текущие данные
-        saveChests();
-
-        // 2. Удаляем голограммы
+        // Удаляем голограммы
         for (DeathChestData data : deathChests.values()) {
             if (data.getHologramId() != null) {
                 plugin.getHologramManager().removeHologram(data.getHologramId());
             }
         }
 
-        // 3. Очищаем карту, чтобы освободить память
+        // Очищаем карту, чтобы освободить память
         deathChests.clear();
 
         plugin.getLogger().info("Сундуки смерти успешно отключены.");
@@ -260,7 +284,6 @@ public class ChestManager {
 
     public void reloadChests() {
         disableChests();
-
         loadChests();
         plugin.getLogger().info("Перезагрузка сундуков смерти завершена.");
     }

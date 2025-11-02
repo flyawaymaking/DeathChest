@@ -159,6 +159,9 @@ public class ChestInteractionListener implements Listener {
             return;
         }
 
+        // Сохраняем изменения в инвентаре
+        chestManager.updateDeathChest(deathChest);
+
         // Check if chest should be removed when empty
         if (configManager.removeEmptyChests() && isInventoryEmpty(inventory)) {
             chestManager.removeDeathChest(chestLocation);

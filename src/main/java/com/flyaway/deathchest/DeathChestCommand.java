@@ -54,8 +54,7 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
 
             case "reload":
                 if (player.hasPermission("deathchest.reload")) {
-                    configManager.reloadConfig();
-                    chestManager.reloadChests();
+                    plugin.reloadConfiguration();
                     player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("reload-success", "&aКонфигурация перезагружена!"));
                 } else {
                     player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("no-permission", "&cУ вас нет прав для использования этой команды"));
