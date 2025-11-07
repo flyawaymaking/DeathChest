@@ -73,8 +73,9 @@ public class ChestInteractionListener implements Listener {
             player.sendMessage(configManager.getPrefix() + " " + message);
         }
 
-        // Open the chest inventory
-        player.openInventory(deathChest.getInventory());
+        Inventory inventory = deathChest.getInventory();
+        chestManager.registerOpenInventory(inventory, location);
+        player.openInventory(inventory);
     }
 
     @EventHandler
@@ -104,6 +105,13 @@ public class ChestInteractionListener implements Listener {
         if (!chestManager.canAccessChest(player, deathChest)) {
             String message = configManager.getMessage("access-denied", "&cЭтот сундук смерти принадлежит игроку: {player}")
                 .replace("{player}", deathChest.getOwnerName());
+            player.sendMessage(configManager.getPrefix() + " " + message);
+            return;
+        }
+
+        // Запрещаем ломать сундук, если он открыт другими игроками
+        if (chestManager.isInventoryOpen(location)) {
+            String message = configManager.getMessage("chest-in-use", "&cНельзя сломать сундук, пока его кто-то использует");
             player.sendMessage(configManager.getPrefix() + " " + message);
             return;
         }
@@ -142,20 +150,17 @@ public class ChestInteractionListener implements Listener {
         Inventory inventory = event.getInventory();
         Player player = (Player) event.getPlayer();
 
-        // Find death chest for this inventory
-        Location chestLocation = null;
-        ChestManager.DeathChestData deathChest = null;
-
-        for (Location location : chestManager.getDeathChests().keySet()) {
-            ChestManager.DeathChestData dc = chestManager.getDeathChest(location);
-            if (dc.getInventory().equals(inventory)) {
-                chestLocation = location;
-                deathChest = dc;
-                break;
-            }
+        // Находим сундук по инвентарю
+        Location chestLocation = chestManager.getOpenInventories().get(inventory);
+        if (chestLocation == null) {
+            return;
         }
 
-        if (chestLocation == null || deathChest == null) {
+        // Убираем из отслеживания открытых инвентарей
+        chestManager.unregisterOpenInventory(inventory);
+
+        ChestManager.DeathChestData deathChest = chestManager.getDeathChest(chestLocation);
+        if (deathChest == null) {
             return;
         }
 
@@ -164,9 +169,12 @@ public class ChestInteractionListener implements Listener {
 
         // Check if chest should be removed when empty
         if (configManager.removeEmptyChests() && isInventoryEmpty(inventory)) {
-            chestManager.removeDeathChest(chestLocation);
-            String message = configManager.getMessage("chest-removed", "&aСундук смерти исчез, так как вы забрали все предметы");
-            player.sendMessage(configManager.getPrefix() + " " + message);
+            // Проверяем, что больше никто не использует этот сундук
+            if (!chestManager.isInventoryOpen(chestLocation)) {
+                chestManager.removeDeathChest(chestLocation);
+                String message = configManager.getMessage("chest-removed", "&aСундук смерти исчез, так как вы забрали все предметы");
+                player.sendMessage(configManager.getPrefix() + " " + message);
+            }
         }
     }
 

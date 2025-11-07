@@ -18,11 +18,13 @@ public class ChestManager {
 
     private final DeathChest plugin;
     private final Map<Location, DeathChestData> deathChests;
+    private final Map<Inventory, Location> openInventories;
     private final File chestsFile;
 
     public ChestManager(DeathChest plugin) {
         this.plugin = plugin;
         this.deathChests = new HashMap<>();
+        this.openInventories = new WeakHashMap<>(); // WeakHashMap для автоматической очистки
         this.chestsFile = new File(plugin.getDataFolder(), "chests.yml");
     }
 
@@ -82,16 +84,12 @@ public class ChestManager {
 
             deathChests.put(block.getLocation(), deathChest);
 
-            // Немедленно сохраняем новый сундук
-            saveDeathChest(deathChest);
-
             if (plugin.getConfigManager().showNameOnChest()) {
                 String hologramId = plugin.getHologramManager().createHologram(block.getLocation(), player.getName());
                 deathChest.setHologramId(hologramId);
-                // Сохраняем обновленные данные с hologramId
-                saveDeathChest(deathChest);
             }
-
+            // Сохраняем новый сундук
+            saveDeathChest(deathChest);
             return true;
 
         } catch (Exception e) {
@@ -115,9 +113,49 @@ public class ChestManager {
         return plugin.getConfigManager().allowAccessOthersChests();
     }
 
+    public void registerOpenInventory(Inventory inventory, Location location) {
+        openInventories.put(inventory, location);
+    }
+
+    public void unregisterOpenInventory(Inventory inventory) {
+        openInventories.remove(inventory);
+    }
+
+    public boolean isInventoryOpen(Location location) {
+        return openInventories.containsValue(location);
+    }
+
+    public int getOpenInventoryCount(Location location) {
+        int count = 0;
+        for (Location loc : openInventories.values()) {
+            if (loc.equals(location)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private void closeAllInventoriesForLocation(Location location) {
+        Iterator<Map.Entry<Inventory, Location>> iterator = openInventories.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Inventory, Location> entry = iterator.next();
+            if (entry.getValue().equals(location)) {
+                // Закрываем инвентарь для всех viewers
+                Inventory inventory = entry.getKey();
+                new ArrayList<>(inventory.getViewers()).forEach(humanEntity ->
+                    humanEntity.closeInventory()
+                );
+                iterator.remove();
+            }
+        }
+    }
+
     public void removeDeathChest(Location location) {
         DeathChestData chest = deathChests.remove(location);
         if (chest != null) {
+            // Закрываем все открытые инвентари этого сундука
+            closeAllInventoriesForLocation(location);
+
             location.getBlock().setType(Material.AIR);
 
             // Удаляем из файла
@@ -226,6 +264,10 @@ public class ChestManager {
         return Collections.unmodifiableMap(deathChests);
     }
 
+    public Map<Inventory, Location> getOpenInventories() {
+        return Collections.unmodifiableMap(openInventories);
+    }
+
     // Очистка просроченных сундуков
     public void cleanupExpiredChests() {
         int expirationTime = plugin.getConfigManager().getExpirationTime();
@@ -243,6 +285,12 @@ public class ChestManager {
 
             if (currentTime - chest.getCreationTime() > expirationMillis) {
                 Location loc = entry.getKey();
+
+                // Не удаляем сундук, если он открыт
+                if (isInventoryOpen(loc)) {
+                    continue;
+                }
+
                 loc.getBlock().setType(Material.AIR);
                 iterator.remove();
 
