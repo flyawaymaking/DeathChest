@@ -82,16 +82,12 @@ public class ChestManager {
 
             deathChests.put(block.getLocation(), deathChest);
 
-            // Немедленно сохраняем новый сундук
-            saveDeathChest(deathChest);
-
             if (plugin.getConfigManager().showNameOnChest()) {
                 String hologramId = plugin.getHologramManager().createHologram(block.getLocation(), player.getName());
                 deathChest.setHologramId(hologramId);
-                // Сохраняем обновленные данные с hologramId
-                saveDeathChest(deathChest);
             }
-
+            // Сохраняем новый сундук
+            saveDeathChest(deathChest);
             return true;
 
         } catch (Exception e) {
