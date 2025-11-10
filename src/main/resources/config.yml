@@ -35,15 +35,14 @@ chest-appearance:
 
 # Настройки сообщений
 messages:
-  prefix: "&6[DeathChest]&f"
+  prefix: "<gradient:gold:white>[DeathChest]</gradient>"
   chest-created: "Ваш сундук смерти создан на координатах: X: {x} Y: {y} Z: {z}"
   chest-accessed: "Вы открываете сундук смерти игрока: {player}"
-  chest-in-use: "&cНельзя сломать сундук, пока его кто-то использует"
-  access-denied: "&cЭтот сундук смерти принадлежит игроку: {player}"
-  cannot-break: "&cВы не можете сломать этот сундук смерти, пока в нём есть предметы"
-  chest-removed: "&aСундук смерти исчез, так как вы забрали все предметы"
-  no-permission: "&cУ вас нет прав для использования этой команды"
+  access-denied: "<red>Этот сундук смерти принадлежит игроку: {player}"
+  cannot-break: "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы"
+  chest-removed: "<green>Сундук смерти исчез, так как вы забрали все предметы"
+  no-permission: "<red>У вас нет прав для использования этой команды"
   chest-broken-own: "Вы сломали свой сундук смерти"
   chest-broken-other: "Вы сломали сундук смерти игрока {player}"
-  no-chests: "&aУ вас нет активных сундуков смерти"
-  reload-success: "&aКонфигурация перезагружена!"
+  no-chests: "<green>У вас нет активных сундуков смерти"
+  reload-success: "<green>Конфигурация перезагружена!"

@@ -1,11 +1,14 @@
 package com.flyaway.deathchest.managers;
 
 import com.flyaway.deathchest.DeathChest;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -18,13 +21,13 @@ public class ChestManager {
 
     private final DeathChest plugin;
     private final Map<Location, DeathChestData> deathChests;
-    private final Map<Inventory, Location> openInventories;
+    private final Map<Location, InventoryTracker> openInventories;
     private final File chestsFile;
 
     public ChestManager(DeathChest plugin) {
         this.plugin = plugin;
         this.deathChests = new HashMap<>();
-        this.openInventories = new WeakHashMap<>(); // WeakHashMap для автоматической очистки
+        this.openInventories = new HashMap<>(); // WeakHashMap для автоматической очистки
         this.chestsFile = new File(plugin.getDataFolder(), "chests.yml");
     }
 
@@ -33,33 +36,85 @@ public class ChestManager {
         private final String ownerName;
         private final Inventory inventory;
         private final long creationTime;
-        private final DeathChest plugin;
         private String hologramId; // ID голограммы
         private final Location location; // Добавляем ссылку на местоположение
 
         public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size, Location location) {
-            this(plugin, owner, ownerName, size, null, location);
+            this(plugin, owner, ownerName, size, null, location, System.currentTimeMillis());
         }
 
-        public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size, String hologramId, Location location) {
-            this.plugin = plugin;
+        public DeathChestData(DeathChest plugin, UUID owner, String ownerName, int size, String hologramId, Location location, long creationTime) {
             this.owner = owner;
             this.ownerName = ownerName;
             this.hologramId = hologramId;
             this.location = location;
+            this.creationTime = creationTime;
+
             String title = plugin.getConfigManager().getChestTitle().replace("{player}", ownerName);
-            this.inventory = plugin.getServer().createInventory(null, size, title);
-            this.creationTime = System.currentTimeMillis();
+
+            Component titleComponent = MiniMessage.miniMessage().deserialize(title);
+            this.inventory = plugin.getServer().createInventory(null, size, titleComponent);
         }
 
         // Getters & Setters
-        public UUID getOwner() { return owner; }
-        public String getOwnerName() { return ownerName; }
-        public Inventory getInventory() { return inventory; }
-        public long getCreationTime() { return creationTime; }
-        public String getHologramId() { return hologramId; }
-        public void setHologramId(String id) { this.hologramId = id; }
-        public Location getLocation() { return location; }
+        public UUID getOwner() {
+            return owner;
+        }
+
+        public String getOwnerName() {
+            return ownerName;
+        }
+
+        public Inventory getInventory() {
+            return inventory;
+        }
+
+        public long getCreationTime() {
+            return creationTime;
+        }
+
+        public String getHologramId() {
+            return hologramId;
+        }
+
+        public void setHologramId(String id) {
+            this.hologramId = id;
+        }
+
+        public Location getLocation() {
+            return location;
+        }
+    }
+
+    public static class InventoryTracker {
+        private final Inventory inventory;
+        private final Location location;
+        private final Set<UUID> viewers = new HashSet<>();
+
+        public InventoryTracker(Inventory inventory, Location location) {
+            this.inventory = inventory;
+            this.location = location;
+        }
+
+        public void addViewer(Player player) {
+            viewers.add(player.getUniqueId());
+        }
+
+        public void removeViewer(Player player) {
+            viewers.remove(player.getUniqueId());
+        }
+
+        public Inventory getInventory() {
+            return inventory;
+        }
+
+        public Location getLocation() {
+            return location;
+        }
+
+        public Set<UUID> getViewers() {
+            return viewers;
+        }
     }
 
     public boolean createDeathChest(Player player, List<ItemStack> items, Location location) {
@@ -113,41 +168,47 @@ public class ChestManager {
         return plugin.getConfigManager().allowAccessOthersChests();
     }
 
-    public void registerOpenInventory(Inventory inventory, Location location) {
-        openInventories.put(inventory, location);
+    public void registerOpenInventory(Player player, Inventory inventory, Location location) {
+        InventoryTracker tracker = openInventories.computeIfAbsent(location,
+                loc -> new InventoryTracker(inventory, location));
+        tracker.addViewer(player);
     }
 
-    public void unregisterOpenInventory(Inventory inventory) {
-        openInventories.remove(inventory);
+    public void unregisterOpenInventory(Player player, Inventory inventory) {
+        // Находим трекер по инвентарю
+        InventoryTracker tracker = openInventories.values().stream()
+                .filter(t -> t.getInventory().equals(inventory))
+                .findFirst()
+                .orElse(null);
+
+        if (tracker != null) {
+            tracker.removeViewer(player);
+            if (tracker.getViewers().isEmpty()) {
+                // Когда все закрыли — очищаем
+                openInventories.remove(tracker.getLocation());
+            }
+        }
     }
 
     public boolean isInventoryOpen(Location location) {
-        return openInventories.containsValue(location);
+        return openInventories.containsKey(location);
     }
 
-    public int getOpenInventoryCount(Location location) {
-        int count = 0;
-        for (Location loc : openInventories.values()) {
-            if (loc.equals(location)) {
-                count++;
-            }
+    public void closeAllInventoriesForLocation(Location location) {
+        InventoryTracker tracker = openInventories.remove(location);
+        if (tracker != null) {
+            new ArrayList<>(tracker.getInventory().getViewers())
+                    .forEach(HumanEntity::closeInventory);
         }
-        return count;
     }
 
-    private void closeAllInventoriesForLocation(Location location) {
-        Iterator<Map.Entry<Inventory, Location>> iterator = openInventories.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Inventory, Location> entry = iterator.next();
-            if (entry.getValue().equals(location)) {
-                // Закрываем инвентарь для всех viewers
-                Inventory inventory = entry.getKey();
-                new ArrayList<>(inventory.getViewers()).forEach(humanEntity ->
-                    humanEntity.closeInventory()
-                );
-                iterator.remove();
+    public Location getLocationByInventory(Inventory inventory) {
+        for (InventoryTracker tracker : openInventories.values()) {
+            if (tracker.getInventory().equals(inventory)) {
+                return tracker.getLocation();
             }
         }
+        return null;
     }
 
     public void removeDeathChest(Location location) {
@@ -242,7 +303,7 @@ public class ChestManager {
                 if (items == null) continue;
 
                 int size = Math.min(((items.size() + 8) / 9) * 9, 54);
-                DeathChestData chest = new DeathChestData(plugin, owner, ownerName, size, hologramId, loc);
+                DeathChestData chest = new DeathChestData(plugin, owner, ownerName, size, hologramId, loc, creationTime);
 
                 chest.getInventory().setContents(items.toArray(new ItemStack[0]));
                 deathChests.put(loc, chest);
@@ -262,10 +323,6 @@ public class ChestManager {
 
     public Map<Location, DeathChestData> getDeathChests() {
         return Collections.unmodifiableMap(deathChests);
-    }
-
-    public Map<Inventory, Location> getOpenInventories() {
-        return Collections.unmodifiableMap(openInventories);
     }
 
     // Очистка просроченных сундуков

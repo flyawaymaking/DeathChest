@@ -3,6 +3,10 @@ package com.flyaway.deathchest.listeners;
 import com.flyaway.deathchest.DeathChest;
 import com.flyaway.deathchest.managers.ChestManager;
 import com.flyaway.deathchest.managers.ConfigManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -24,11 +28,13 @@ public class DeathListener implements Listener {
     private final DeathChest plugin;
     private final ConfigManager configManager;
     private final ChestManager chestManager;
+    private final MiniMessage miniMessage;
 
     public DeathListener(DeathChest plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         this.chestManager = plugin.getChestManager();
+        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -69,31 +75,27 @@ public class DeathListener implements Listener {
             event.getDrops().clear();
 
             // Send message to player
-            String message = configManager.getMessage("chest-created", "Ваш сундук смерти создан на координатах: X: {x} Y: {y} Z: {z}")
-                .replace("{x}", String.valueOf(chestLocation.getBlockX()))
-                .replace("{y}", String.valueOf(chestLocation.getBlockY()))
-                .replace("{z}", String.valueOf(chestLocation.getBlockZ()));
+            Component message = buildMessage("chest-created",
+                    "Ваш сундук смерти создан на координатах: X: {x} Y: {y} Z: {z}",
+                    Placeholder.unparsed("x", String.valueOf(chestLocation.getBlockX())),
+                    Placeholder.unparsed("y", String.valueOf(chestLocation.getBlockY())),
+                    Placeholder.unparsed("z", String.valueOf(chestLocation.getBlockZ())));
 
-            player.sendMessage(configManager.getPrefix() + " " + message);
+            player.sendMessage(message);
         }
     }
 
     private boolean shouldCreateDeathChest(Player player) {
         // Check mob-death-only setting
-        if (configManager.isMobDeathOnly() && !wasKilledByMob(player)) {
-            return false;
-        }
-
-        return true;
+        return !configManager.isMobDeathOnly() || wasKilledByMob(player);
     }
 
     private boolean wasKilledByMob(Player player) {
         EntityDamageEvent lastDamage = player.getLastDamageCause();
-        if (!(lastDamage instanceof EntityDamageByEntityEvent)) {
+        if (!(lastDamage instanceof EntityDamageByEntityEvent entityEvent)) {
             return false;
         }
 
-        EntityDamageByEntityEvent entityEvent = (EntityDamageByEntityEvent) lastDamage;
         Entity damager = entityEvent.getDamager();
 
         // Check if damager is a mob
@@ -102,12 +104,9 @@ public class DeathListener implements Listener {
         }
 
         // Check if damager is a projectile from a mob
-        if (damager instanceof Projectile) {
-            Projectile projectile = (Projectile) damager;
+        if (damager instanceof Projectile projectile) {
             ProjectileSource shooter = projectile.getShooter();
-            if (shooter instanceof Monster || shooter instanceof Animals) {
-                return true;
-            }
+            return shooter instanceof Monster || shooter instanceof Animals;
         }
 
         return false;
@@ -153,6 +152,23 @@ public class DeathListener implements Listener {
     private boolean isSuitableForChest(Block block) {
         Material type = block.getType();
         return (type.isAir() || type == Material.WATER || type == Material.LAVA) &&
-               block.getRelative(0, 1, 0).getType().isAir();
+                block.getRelative(0, 1, 0).getType().isAir();
+    }
+
+    /**
+     * Строит компонент сообщения с префиксом и плейсхолдерами
+     */
+    private Component buildMessage(String messageKey, String defaultMessage, TagResolver... placeholders) {
+        String message = configManager.getMessage(messageKey, defaultMessage);
+        String prefix = configManager.getPrefix();
+
+        // Объединяем префикс и сообщение
+        String fullMessage = prefix + " " + message;
+
+        if (placeholders.length > 0) {
+            return miniMessage.deserialize(fullMessage, placeholders);
+        } else {
+            return miniMessage.deserialize(fullMessage);
+        }
     }
 }

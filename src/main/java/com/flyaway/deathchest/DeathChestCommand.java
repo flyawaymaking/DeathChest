@@ -2,6 +2,8 @@ package com.flyaway.deathchest;
 
 import com.flyaway.deathchest.managers.ChestManager;
 import com.flyaway.deathchest.managers.ConfigManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,25 +22,27 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
     private final DeathChest plugin;
     private final ConfigManager configManager;
     private final ChestManager chestManager;
+    private final MiniMessage miniMessage;
 
     public DeathChestCommand(DeathChest plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         this.chestManager = plugin.getChestManager();
+        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player player)) {
             sender.sendMessage("Эта команда может быть использована только игроками.");
             return true;
         }
 
-        Player player = (Player) sender;
-
         // Проверка разрешения deathchest.use
         if (!player.hasPermission("deathchest.use")) {
-            player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("no-permission", "&cУ вас нет прав для использования этой команды"));
+            Component message = buildMessage("no-permission",
+                    "<red>У вас нет прав для использования этой команды");
+            player.sendMessage(message);
             return true;
         }
 
@@ -55,14 +59,21 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
             case "reload":
                 if (player.hasPermission("deathchest.reload")) {
                     plugin.reloadConfiguration();
-                    player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("reload-success", "&aКонфигурация перезагружена!"));
+                    Component message = buildMessage("reload-success",
+                            "<green>Конфигурация перезагружена!");
+                    player.sendMessage(message);
                 } else {
-                    player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("no-permission", "&cУ вас нет прав для использования этой команды"));
+                    Component message = buildMessage("no-permission",
+                            "<red>У вас нет прав для использования этой команды");
+                    player.sendMessage(message);
                 }
                 break;
 
             case "version":
-                player.sendMessage(configManager.getPrefix() + " §fDeathChest v1.0.0");
+                Component versionMessage = miniMessage.deserialize(
+                        configManager.getPrefix() + " <white>DeathChest v1.1.0"
+                );
+                player.sendMessage(versionMessage);
                 break;
 
             default:
@@ -74,16 +85,17 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(Player player) {
-        player.sendMessage("§6=== Команды DeathChest ===");
-        player.sendMessage("§f/deathchest list §7- Показать ваши сундуки смерти");
-        player.sendMessage("§f/deathchest reload §7- Перезагрузить конфигурацию (требуются права)");
-        player.sendMessage("§f/deathchest version §7- Показать версию плагина");
-        player.sendMessage("§f/deathchest help §7- Показать эту справку");
+        Component header = miniMessage.deserialize("<gradient:gold:white>=== Команды DeathChest ===");
+        player.sendMessage(header);
+        player.sendMessage(miniMessage.deserialize("<white>/deathchest list <gray>- Показать ваши сундуки смерти"));
+        player.sendMessage(miniMessage.deserialize("<white>/deathchest reload <gray>- Перезагрузить конфигурацию (требуются права)"));
+        player.sendMessage(miniMessage.deserialize("<white>/deathchest version <gray>- Показать версию плагина"));
+        player.sendMessage(miniMessage.deserialize("<white>/deathchest help <gray>- Показать эту справку"));
     }
 
     private void listChests(Player player) {
         Map<Location, ChestManager.DeathChestData> chests = chestManager.getDeathChests();
-        List<String> playerChests = new ArrayList<>();
+        List<Component> playerChests = new ArrayList<>();
 
         for (Map.Entry<Location, ChestManager.DeathChestData> entry : chests.entrySet()) {
             Location location = entry.getKey();
@@ -97,22 +109,35 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
 
                 // Calculate time since creation
                 Duration duration = Duration.between(
-                    Instant.ofEpochMilli(chest.getCreationTime()),
-                    Instant.now()
+                        Instant.ofEpochMilli(chest.getCreationTime()),
+                        Instant.now()
                 );
 
                 String timeAgo = formatDuration(duration);
-                playerChests.add(String.format("§eМир: §f%s §eX: §f%d §eY: §f%d §eZ: §f%d §7(%s назад)",
-                    world, x, y, z, timeAgo));
+
+                Component chestInfo = miniMessage.deserialize(
+                        "<yellow>Мир: <white>" + world +
+                                " <yellow>X: <white>" + x +
+                                " <yellow>Y: <white>" + y +
+                                " <yellow>Z: <white>" + z +
+                                " <gray>(" + timeAgo + " назад)"
+                );
+                playerChests.add(chestInfo);
             }
         }
 
         if (playerChests.isEmpty()) {
-            player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("no-chests", "&aУ вас нет активных сундуков смерти"));
+            Component message = buildMessage("no-chests",
+                    "<green>У вас нет активных сундуков смерти");
+            player.sendMessage(message);
         } else {
-            player.sendMessage("§6=== Ваши сундуки смерти ===");
+            Component header = miniMessage.deserialize("<gradient:gold:white>=== Ваши сундуки смерти ===");
+            player.sendMessage(header);
             for (int i = 0; i < playerChests.size(); i++) {
-                player.sendMessage((i + 1) + ". " + playerChests.get(i));
+                Component numberedEntry = miniMessage.deserialize(
+                        "<white>" + (i + 1) + ". "
+                ).append(playerChests.get(i));
+                player.sendMessage(numberedEntry);
             }
         }
     }
@@ -124,15 +149,15 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
 
         if (days > 0) {
             return String.format("%d %s и %d %s",
-                days, days == 1 ? "день" : "дней",
-                hours, hours == 1 ? "час" : "часов");
+                    days, days == 1 ? "день" : "дней",
+                    hours, hours == 1 ? "час" : "часов");
         } else if (hours > 0) {
             return String.format("%d %s и %d %s",
-                hours, hours == 1 ? "час" : "часов",
-                minutes, minutes == 1 ? "минута" : "минут");
+                    hours, hours == 1 ? "час" : "часов",
+                    minutes, minutes == 1 ? "минута" : "минут");
         } else {
             return String.format("%d %s",
-                minutes, minutes == 1 ? "минута" : "минут");
+                    minutes, minutes == 1 ? "минута" : "минут");
         }
     }
 
@@ -150,5 +175,18 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
         }
 
         return completions;
+    }
+
+    /**
+     * Строит компонент сообщения с префиксом
+     */
+    private Component buildMessage(String messageKey, String defaultMessage) {
+        String message = configManager.getMessage(messageKey, defaultMessage);
+        String prefix = configManager.getPrefix();
+
+        // Объединяем префикс и сообщение
+        String fullMessage = prefix + " " + message;
+
+        return miniMessage.deserialize(fullMessage);
     }
 }
