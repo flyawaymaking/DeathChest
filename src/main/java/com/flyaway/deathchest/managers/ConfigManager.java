@@ -68,19 +68,18 @@ public class ConfigManager {
     }
 
     public String getChestTitle() {
-        return config.getString("chest-appearance.chest-title", "Death Chest: {player}");
+        return config.getString("chest-appearance.chest-title", "Сундук смерти: {player}");
     }
 
     public int getExpirationTime() {
         return config.getInt("chest-appearance.expiration-time", 0);
     }
 
-    // Message settings
     public String getMessage(String path, String def) {
-        return config.getString("messages." + path, def).replace("&", "§");
+        return config.getString("messages." + path, def);
     }
 
     public String getPrefix() {
-        return getMessage("prefix", "&6[DeathChest]&f");
+        return getMessage("prefix", "<gradient:gold:white>[DeathChest]</gradient>");
     }
 }

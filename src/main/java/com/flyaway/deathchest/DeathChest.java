@@ -8,6 +8,8 @@ import com.flyaway.deathchest.listeners.DeathListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Objects;
+
 public class DeathChest extends JavaPlugin {
 
     private static DeathChest instance;
@@ -33,7 +35,7 @@ public class DeathChest extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChestInteractionListener(this), this);
 
         // Register commands
-        getCommand("deathchest").setExecutor(new DeathChestCommand(this));
+        Objects.requireNonNull(getCommand("deathchest")).setExecutor(new DeathChestCommand(this));
 
         // Load existing chests
         chestManager.loadChests();

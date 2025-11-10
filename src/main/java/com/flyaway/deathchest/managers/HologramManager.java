@@ -24,7 +24,7 @@ public class HologramManager {
     private void checkDependency() {
         this.enabled = plugin.getServer().getPluginManager().getPlugin("DecentHolograms") != null;
 
-        if (enabled) {
+        if (isEnabled()) {
             plugin.getLogger().info("§aDecentHolograms найден — поддержка голограмм активирована.");
         } else {
             plugin.getLogger().warning("§eDecentHolograms не найден — голограммы будут отключены.");
@@ -32,7 +32,7 @@ public class HologramManager {
     }
 
     public String createHologram(Location location, String ownerName) {
-        if (!enabled) return null;
+        if (!isEnabled()) return null;
 
         Block block = location.getBlock();
         if (block.getType() != Material.CHEST) return null;
@@ -53,7 +53,7 @@ public class HologramManager {
     }
 
     public void removeHologram(String id) {
-        if (!enabled || id == null) return;
+        if (!isEnabled() || id == null) return;
         Hologram hologram = DHAPI.getHologram(id);
         if (hologram != null) {
             hologram.delete();
@@ -61,7 +61,7 @@ public class HologramManager {
     }
 
     public void updateHologram(String id, String ownerName) {
-        if (!enabled || id == null) return;
+        if (!isEnabled() || id == null) return;
 
         Hologram hologram = DHAPI.getHologram(id);
         if (hologram != null) {
@@ -71,8 +71,8 @@ public class HologramManager {
 
     private List<String> getHologramLines(String ownerName) {
         return Arrays.asList(
-            "§e☠ §6Сундук смерти §e☠",
-            "§7Игрока: §f" + ownerName
+                "§e☠ §6Сундук смерти §e☠",
+                "§7Игрока: §f" + ownerName
         );
     }
 
@@ -85,19 +85,19 @@ public class HologramManager {
         plugin.getLogger().info("Перезагрузка менеджера голограмм...");
 
         // Проверяем доступность DecentHolograms
-        boolean wasEnabled = enabled;
+        boolean wasEnabled = isEnabled();
         checkDependency();
 
-        if (!enabled) {
+        if (!isEnabled()) {
             plugin.getLogger().warning("DecentHolograms не доступен - голограммы отключены");
             return;
         }
 
         // Если плагин был только что включен, восстанавливаем все голограммы
-        if (enabled && !wasEnabled) {
+        if (isEnabled() && !wasEnabled) {
             plugin.getLogger().info("DecentHolograms снова доступен - восстанавливаем голограммы...");
             restoreAllHolograms();
-        } else if (enabled) {
+        } else if (isEnabled()) {
             plugin.getLogger().info("DecentHolograms доступен - голограммы активны");
         }
     }

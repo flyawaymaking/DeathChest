@@ -3,6 +3,8 @@ package com.flyaway.deathchest.listeners;
 import com.flyaway.deathchest.DeathChest;
 import com.flyaway.deathchest.managers.ChestManager;
 import com.flyaway.deathchest.managers.ConfigManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -18,17 +20,18 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ChestInteractionListener implements Listener {
 
-    private final DeathChest plugin;
     private final ConfigManager configManager;
     private final ChestManager chestManager;
+    private final MiniMessage miniMessage;
 
     public ChestInteractionListener(DeathChest plugin) {
-        this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         this.chestManager = plugin.getChestManager();
+        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @EventHandler
@@ -54,27 +57,31 @@ public class ChestInteractionListener implements Listener {
 
         // Проверка разрешения deathchest.use
         if (!player.hasPermission("deathchest.use")) {
-            player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("no-permission", "&cУ вас нет прав для использования этой команды"));
+            Component message = buildMessage("no-permission",
+                    "<red>У вас нет прав для использования этой команды");
+            player.sendMessage(message);
             return;
         }
 
         // Check access permissions
         if (!chestManager.canAccessChest(player, deathChest)) {
-            String message = configManager.getMessage("access-denied", "&cЭтот сундук смерти принадлежит игроку: {player}")
-                .replace("{player}", deathChest.getOwnerName());
-            player.sendMessage(configManager.getPrefix() + " " + message);
+            Component message = buildMessage("access-denied",
+                    "<red>Этот сундук смерти принадлежит игроку: {player}",
+                    Map.of("player", deathChest.getOwnerName()));
+            player.sendMessage(message);
             return;
         }
 
         // Send access message if accessing someone else's chest
         if (!deathChest.getOwner().equals(player.getUniqueId())) {
-            String message = configManager.getMessage("chest-accessed", "Вы открываете сундук смерти игрока: {player}")
-                .replace("{player}", deathChest.getOwnerName());
-            player.sendMessage(configManager.getPrefix() + " " + message);
+            Component message = buildMessage("chest-accessed",
+                    "Вы открываете сундук смерти игрока: {player}",
+                    Map.of("player", deathChest.getOwnerName()));
+            player.sendMessage(message);
         }
 
         Inventory inventory = deathChest.getInventory();
-        chestManager.registerOpenInventory(inventory, location);
+        chestManager.registerOpenInventory(player, inventory, location);
         player.openInventory(inventory);
     }
 
@@ -97,22 +104,18 @@ public class ChestInteractionListener implements Listener {
 
         // Проверка разрешения deathchest.use
         if (!player.hasPermission("deathchest.use")) {
-            player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("no-permission", "&cУ вас нет прав для использования этой команды"));
+            Component message = buildMessage("no-permission",
+                    "<red>У вас нет прав для использования этой команды");
+            player.sendMessage(message);
             return;
         }
 
         // Check access permissions
         if (!chestManager.canAccessChest(player, deathChest)) {
-            String message = configManager.getMessage("access-denied", "&cЭтот сундук смерти принадлежит игроку: {player}")
-                .replace("{player}", deathChest.getOwnerName());
-            player.sendMessage(configManager.getPrefix() + " " + message);
-            return;
-        }
-
-        // Запрещаем ломать сундук, если он открыт другими игроками
-        if (chestManager.isInventoryOpen(location)) {
-            String message = configManager.getMessage("chest-in-use", "&cНельзя сломать сундук, пока его кто-то использует");
-            player.sendMessage(configManager.getPrefix() + " " + message);
+            Component message = buildMessage("access-denied",
+                    "<red>Этот сундук смерти принадлежит игроку: {player}",
+                    Map.of("player", deathChest.getOwnerName()));
+            player.sendMessage(message);
             return;
         }
 
@@ -121,10 +124,13 @@ public class ChestInteractionListener implements Listener {
             // Only allow breaking if chest is empty
             if (isInventoryEmpty(deathChest.getInventory())) {
                 chestManager.removeDeathChest(location);
-                player.sendMessage(configManager.getPrefix() + " " + "Сундук смерти удален.");
+                Component message = buildMessage("chest-removed",
+                        "<green>Сундук смерти исчез, так как вы забрали все предметы");
+                player.sendMessage(message);
             } else {
-                String message = configManager.getMessage("cannot-break", "&cВы не можете сломать этот сундук смерти, пока в нём есть предметы");
-                player.sendMessage(configManager.getPrefix() + " " + message);
+                Component message = buildMessage("cannot-break",
+                        "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы");
+                player.sendMessage(message);
             }
             return;
         }
@@ -137,11 +143,14 @@ public class ChestInteractionListener implements Listener {
         chestManager.removeDeathChest(location);
 
         if (deathChest.getOwner().equals(player.getUniqueId())) {
-            player.sendMessage(configManager.getPrefix() + " " + configManager.getMessage("chest-broken-own", "Вы сломали свой сундук смерти"));
+            Component message = buildMessage("chest-broken-own",
+                    "Вы сломали свой сундук смерти");
+            player.sendMessage(message);
         } else {
-            String message = configManager.getMessage("chest-broken-other", "Вы сломали сундук смерти игрока {player}")
-                .replace("{player}", deathChest.getOwnerName());
-            player.sendMessage(configManager.getPrefix() + " " + message);
+            Component message = buildMessage("chest-broken-other",
+                    "Вы сломали сундук смерти игрока {player}",
+                    Map.of("player", deathChest.getOwnerName()));
+            player.sendMessage(message);
         }
     }
 
@@ -151,30 +160,27 @@ public class ChestInteractionListener implements Listener {
         Player player = (Player) event.getPlayer();
 
         // Находим сундук по инвентарю
-        Location chestLocation = chestManager.getOpenInventories().get(inventory);
+        Location chestLocation = chestManager.getLocationByInventory(inventory);
         if (chestLocation == null) {
             return;
         }
-
-        // Убираем из отслеживания открытых инвентарей
-        chestManager.unregisterOpenInventory(inventory);
 
         ChestManager.DeathChestData deathChest = chestManager.getDeathChest(chestLocation);
         if (deathChest == null) {
             return;
         }
 
-        // Сохраняем изменения в инвентаре
-        chestManager.updateDeathChest(deathChest);
-
-        // Check if chest should be removed when empty
         if (configManager.removeEmptyChests() && isInventoryEmpty(inventory)) {
-            // Проверяем, что больше никто не использует этот сундук
-            if (!chestManager.isInventoryOpen(chestLocation)) {
-                chestManager.removeDeathChest(chestLocation);
-                String message = configManager.getMessage("chest-removed", "&aСундук смерти исчез, так как вы забрали все предметы");
-                player.sendMessage(configManager.getPrefix() + " " + message);
-            }
+            // Check if chest should be removed when empty
+            chestManager.removeDeathChest(chestLocation);
+            Component message = buildMessage("chest-removed",
+                    "<green>Сундук смерти исчез, так как вы забрали все предметы");
+            player.sendMessage(message);
+        } else {
+            // Убираем из отслеживания открытых инвентарей
+            chestManager.unregisterOpenInventory(player, inventory);
+            // Сохраняем изменения в инвентаре
+            chestManager.updateDeathChest(deathChest);
         }
     }
 
@@ -183,7 +189,7 @@ public class ChestInteractionListener implements Listener {
         if (configManager.isExplosionProof()) {
             // Remove death chests from explosion list to protect them
             event.blockList().removeIf(block ->
-                block.getType() == Material.CHEST && chestManager.isDeathChest(block.getLocation())
+                    block.getType() == Material.CHEST && chestManager.isDeathChest(block.getLocation())
             );
         } else {
             // Handle explosion - drop items and remove chest
@@ -210,7 +216,7 @@ public class ChestInteractionListener implements Listener {
         if (configManager.isExplosionProof()) {
             // Remove death chests from explosion list to protect them
             event.blockList().removeIf(block ->
-                block.getType() == Material.CHEST && chestManager.isDeathChest(block.getLocation())
+                    block.getType() == Material.CHEST && chestManager.isDeathChest(block.getLocation())
             );
         } else {
             // Handle explosion - drop items and remove chest
@@ -286,5 +292,29 @@ public class ChestInteractionListener implements Listener {
                 location.getWorld().dropItemNaturally(location, item);
             }
         }
+    }
+
+    /**
+     * Строит компонент сообщения с префиксом и плейсхолдерами
+     */
+    private Component buildMessage(String messageKey, String defaultMessage) {
+        return buildMessage(messageKey, defaultMessage, Map.of());
+    }
+
+    private Component buildMessage(String messageKey, String defaultMessage, Map<String, String> placeholders) {
+        String message = configManager.getMessage(messageKey, defaultMessage);
+        String prefix = configManager.getPrefix();
+
+        String fullMessage = prefix + " " + message;
+
+        // Подставляем все {ключ} → значение
+        if (placeholders != null && !placeholders.isEmpty()) {
+            for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+                fullMessage = fullMessage.replace("{" + entry.getKey() + "}", entry.getValue());
+            }
+        }
+
+        // Парсим MiniMessage для цветовых тегов и форматирования
+        return miniMessage.deserialize(fullMessage);
     }
 }
