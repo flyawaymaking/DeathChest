@@ -100,14 +100,14 @@ public class DeathListener implements Listener {
         Entity damager = entityEvent.getDamager();
 
         // Check if damager is a mob
-        if (damager instanceof Monster || damager instanceof Animals) {
+        if (damager instanceof LivingEntity && !(damager instanceof Player)) {
             return true;
         }
 
         // Check if damager is a projectile from a mob
         if (damager instanceof Projectile projectile) {
             ProjectileSource shooter = projectile.getShooter();
-            return shooter instanceof Monster || shooter instanceof Animals;
+            return shooter instanceof LivingEntity && !(shooter instanceof Player);
         }
 
         return false;
@@ -128,17 +128,16 @@ public class DeathListener implements Listener {
 
     private Location findChestLocation(Location deathLocation) {
         Location location = deathLocation.clone();
-        Block block = location.getBlock();
 
-        // Try current position
-        if (isSuitableForChest(block)) {
+        // Пробуем сначала текущий блок
+        if (isSuitableForChest(location.getBlock())) {
             return location;
         }
 
-        // Try positions around death location
+        // Проверяем куб 3x3x5 (вверх и вниз)
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
-                for (int y = 0; y <= 2; y++) {
+                for (int y = -2; y <= 2; y++) {
                     Location testLoc = location.clone().add(x, y, z);
                     if (isSuitableForChest(testLoc.getBlock())) {
                         return testLoc;
@@ -152,8 +151,18 @@ public class DeathListener implements Listener {
 
     private boolean isSuitableForChest(Block block) {
         Material type = block.getType();
-        return (type.isAir() || type == Material.WATER || type == Material.LAVA) &&
-                block.getRelative(0, 1, 0).getType().isAir();
+        return type.isAir()
+                || type == Material.SHORT_GRASS
+                || type == Material.TALL_GRASS
+                || type == Material.FERN
+                || type == Material.LARGE_FERN
+                || type == Material.DEAD_BUSH
+                || type == Material.SEAGRASS
+                || type == Material.TALL_SEAGRASS
+                || type == Material.VINE
+                || type == Material.SNOW
+                || type == Material.WATER
+                || type == Material.LAVA;
     }
 
     /**

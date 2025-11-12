@@ -71,7 +71,7 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
 
             case "version":
                 Component versionMessage = miniMessage.deserialize(
-                        configManager.getPrefix() + " <white>DeathChest v1.1.0"
+                        configManager.getPrefix() + " <white>DeathChest v1.1.1"
                 );
                 player.sendMessage(versionMessage);
                 break;
