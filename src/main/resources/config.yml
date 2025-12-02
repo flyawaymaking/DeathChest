@@ -5,16 +5,16 @@ chest-creation:
   # Создавать сундук только при смерти от моба
   mob-death-only: false
   # Миры, где разрешены сундуки смерти (пусто = все миры)
-  allowed-worlds: []
+  allowed-worlds: [ ]
   # Запрещенные миры, где сундуки смерти отключены
-  blacklisted-worlds: []
+  blacklisted-worlds: [ ]
 
 # Настройки взаимодействия с сундуком
 chest-interactions:
-  # Могут ли игроки открывать и ломать чужие сундуки смерти
-  allow-access-others-chests: false
+  # Могут ли игроки взаимодействовать с чужими сундуками смерти
+  allow-access-others-chests: true
   # Могут ли игроки ломать сундук смерти
-  player-breakable: false
+  player-breakable: true
   # Защищен ли сундук от взрывов
   explosion-proof: true
   # Выпадают ли предметы при взрыве сундука
@@ -26,23 +26,48 @@ chest-interactions:
 
 # Настройки внешнего вида сундука
 chest-appearance:
-  # Отображать ли имя владельца на сундуке
-  name-on-chest: true
-  # Пользовательский заголовок сундука
-  chest-title: "Сундук смерти: {player}"
+  # Пользовательский заголовок сундука (поддерживает MiniMessages)
+  title: "<gradient:gold:white>Сундук смерти:</gradient> <gold>{player}"
   # Время истечения срока действия сундука в минутах (0 = никогда не истекает)
-  expiration-time: 0
+  expiration-time: 1440  # По умолчанию 24 часа
+  # Отображать ли голограмму над сундуком (требуется DecentHolograms)
+  hologram-enabled: true
+  # Не поддерживает MiniMessages, нужно использовать цвета https://wiki.decentholograms.eu/general/format-and-colors/colors/
+  hologram:
+    - "<#800000>☠ <#FFD700>Сундук смерти </#FFFFFF><#800000>☠"
+    - "<#FFD700>Игрока: <#FFFFFF>{owner}"
 
-# Настройки сообщений
+# Перевод для времени
+time-ago:
+  days: "дней"
+  hours: "часов"
+  minutes: "минут"
+
+# Префикс сообщений (поддерживает MiniMessages)
+prefix: "<gradient:gold:white>[DeathChest]</gradient>"
+
+# Сообщения (поддерживает MiniMessages)
 messages:
-  prefix: "<gradient:gold:white>[DeathChest]</gradient>"
-  chest-created: "Ваш сундук смерти создан на координатах: X: {x} Y: {y} Z: {z}"
-  chest-accessed: "Вы открываете сундук смерти игрока: {player}"
-  access-denied: "<red>Этот сундук смерти принадлежит игроку: {player}"
-  cannot-break: "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы"
-  chest-removed: "<green>Сундук смерти исчез, так как вы забрали все предметы"
+  # команды
+  player-only: "<red>Эта команда может быть использована только игроками."
   no-permission: "<red>У вас нет прав для использования этой команды"
-  chest-broken-own: "Вы сломали свой сундук смерти"
-  chest-broken-other: "Вы сломали сундук смерти игрока {player}"
+  help: |
+    <gradient:gold:white>=== Команды DeathChest ===
+    <white>/deathchest list <gray>- Показать ваши сундуки смерти
+    <white>/deathchest reload <gray>- Перезагрузить конфигурацию (требуются права)
+    <white>/deathchest version <gray>- Показать версию плагина
+    <white>/deathchest help <gray>- Показать эту справку
+  version: "<white>DeathChest <yellow>v{version}"
+  list-header: "<gradient:gold:white>=== Ваши сундуки смерти ===</gradient>"
+  list-format: "<yellow>Мир: <white>{world} <yellow>X: <white>{x} <yellow>Y: <white>{y} <yellow>Z: <white>{z} <gray>({time} назад)"
+  list-numbered: "<white>{number}. "
   no-chests: "<green>У вас нет активных сундуков смерти"
   reload-success: "<green>Конфигурация перезагружена!"
+  # слушатели
+  chest-created: "<white>Ваш сундук смерти создан на координатах: <yellow>X: {x} Y: {y} Z: {z}."
+  chest-accessed: "<white>Вы открываете сундук смерти игрока: <yellow>{player}."
+  access-denied: "<red>Этот сундук смерти принадлежит игроку: <yellow>{player}."
+  cannot-break: "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы!"
+  chest-removed: "<green>Сундук смерти исчез, так как вы забрали все предметы."
+  chest-broken-own: "<white>Вы сломали свой сундук смерти."
+  chest-broken-other: "<white>Вы сломали сундук смерти игрока <yellow>{player}."

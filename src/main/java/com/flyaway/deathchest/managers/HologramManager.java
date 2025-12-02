@@ -25,9 +25,9 @@ public class HologramManager {
         this.enabled = plugin.getServer().getPluginManager().getPlugin("DecentHolograms") != null;
 
         if (isEnabled()) {
-            plugin.getLogger().info("§aDecentHolograms найден — поддержка голограмм активирована.");
+            plugin.getLogger().info("DecentHolograms найден — поддержка голограмм активирована.");
         } else {
-            plugin.getLogger().warning("§eDecentHolograms не найден — голограммы будут отключены.");
+            plugin.getLogger().warning("DecentHolograms не найден — голограммы будут отключены.");
         }
     }
 
@@ -41,12 +41,15 @@ public class HologramManager {
         String id = "deathchest_" + UUID.randomUUID().toString().substring(0, 8) + "_" +
                 location.getBlockX() + "_" + location.getBlockY() + "_" + location.getBlockZ();
 
-        // Удаляем старую голограмму если существует
         if (DHAPI.getHologram(id) != null) {
             DHAPI.removeHologram(id);
         }
 
-        Hologram hologram = DHAPI.createHologram(id, holoLoc, getHologramLines(ownerName));
+        List<String> holoLines = getHologramLines(ownerName);
+
+        if (holoLines.isEmpty()) return null;
+
+        Hologram hologram = DHAPI.createHologram(id, holoLoc, holoLines);
         hologram.showAll();
 
         return id;
@@ -60,20 +63,11 @@ public class HologramManager {
         }
     }
 
-    public void updateHologram(String id, String ownerName) {
-        if (!isEnabled() || id == null) return;
-
-        Hologram hologram = DHAPI.getHologram(id);
-        if (hologram != null) {
-            DHAPI.setHologramLines(hologram, getHologramLines(ownerName));
-        }
-    }
-
     private List<String> getHologramLines(String ownerName) {
-        return Arrays.asList(
-                "§e☠ §6Сундук смерти §e☠",
-                "§7Игрока: §f" + ownerName
-        );
+        return plugin.getConfigManager().getHoloLines()
+                .stream()
+                .map(line -> line.replace("{owner}", ownerName))
+                .toList();
     }
 
     /**
@@ -113,13 +107,11 @@ public class HologramManager {
             Location location = chest.getLocation();
             Block block = location.getBlock();
 
-            // Проверяем, что блок все еще сундук
             if (block.getType() != Material.CHEST) {
                 continue;
             }
 
-            // Если у сундука нет голограммы, но она должна быть отображена
-            if (chest.getHologramId() == null && plugin.getConfigManager().showNameOnChest()) {
+            if (chest.getHologramId() == null && plugin.getConfigManager().isHoloEnabled()) {
                 String hologramId = createHologram(location, chest.getOwnerName());
                 chest.setHologramId(hologramId);
                 restoredCount++;

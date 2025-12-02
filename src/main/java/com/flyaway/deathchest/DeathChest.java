@@ -5,6 +5,7 @@ import com.flyaway.deathchest.managers.ConfigManager;
 import com.flyaway.deathchest.managers.HologramManager;
 import com.flyaway.deathchest.listeners.ChestInteractionListener;
 import com.flyaway.deathchest.listeners.DeathListener;
+import com.flyaway.deathchest.managers.MessageManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -22,25 +23,21 @@ public class DeathChest extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // Initialize managers
         this.configManager = new ConfigManager(this);
         this.chestManager = new ChestManager(this);
         this.hologramManager = new HologramManager(this);
 
-        // Load configuration
         configManager.loadConfig();
 
-        // Register listeners
+        MessageManager.init(this);
+
         getServer().getPluginManager().registerEvents(new DeathListener(this), this);
         getServer().getPluginManager().registerEvents(new ChestInteractionListener(this), this);
 
-        // Register commands
         Objects.requireNonNull(getCommand("deathchest")).setExecutor(new DeathChestCommand(this));
 
-        // Load existing chests
         chestManager.loadChests();
 
-        // Запускаем периодическую задачу
         runScheduledTask();
 
         getLogger().info("DeathChest был включен!");
@@ -48,12 +45,10 @@ public class DeathChest extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Отменяем задачу если она запущена
         if (scheduledTask != null && !scheduledTask.isCancelled()) {
             scheduledTask.cancel();
         }
 
-        // Final save chest data and disable chests
         chestManager.disableChests();
         getLogger().info("DeathChest был выключен!");
     }
@@ -69,12 +64,12 @@ public class DeathChest extends JavaPlugin {
     }
 
     public void reloadConfiguration() {
-        // Отменяем задачу если она запущена
         if (scheduledTask != null && !scheduledTask.isCancelled()) {
             scheduledTask.cancel();
         }
 
         configManager.reloadConfig();
+        MessageManager.init(this);
         chestManager.reloadChests();
         hologramManager.reload();
 

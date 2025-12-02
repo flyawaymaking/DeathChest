@@ -24,7 +24,6 @@ public class ConfigManager {
         this.config = plugin.getConfig();
     }
 
-    // Chest creation settings
     public boolean isMobDeathOnly() {
         return config.getBoolean("chest-creation.mob-death-only", false);
     }
@@ -37,7 +36,6 @@ public class ConfigManager {
         return config.getStringList("chest-creation.blacklisted-worlds");
     }
 
-    // Chest interaction settings
     public boolean allowAccessOthersChests() {
         return config.getBoolean("chest-interactions.allow-access-others-chests", false);
     }
@@ -62,13 +60,20 @@ public class ConfigManager {
         return config.getBoolean("chest-interactions.remove-empty-chests", true);
     }
 
-    // Appearance settings
-    public boolean showNameOnChest() {
-        return config.getBoolean("chest-appearance.name-on-chest", true);
+    public boolean isHoloEnabled() {
+        return config.getBoolean("chest-appearance.hologram-enabled", true);
+    }
+
+    public List<String> getHoloLines() {
+        return config.getStringList("chest-appearance.hologram");
     }
 
     public String getChestTitle() {
-        return config.getString("chest-appearance.chest-title", "Сундук смерти: {player}");
+        return config.getString("chest-appearance.title", "Сундук смерти: {player}");
+    }
+
+    public String getTimeAgo(String key) {
+        return config.getString("time-ago" + key, key);
     }
 
     public int getExpirationTime() {
@@ -80,6 +85,6 @@ public class ConfigManager {
     }
 
     public String getPrefix() {
-        return getMessage("prefix", "<gradient:gold:white>[DeathChest]</gradient>");
+        return config.getString("prefix", "<gradient:gold:white>[DeathChest]</gradient>");
     }
 }

@@ -2,8 +2,8 @@ package com.flyaway.deathchest;
 
 import com.flyaway.deathchest.managers.ChestManager;
 import com.flyaway.deathchest.managers.ConfigManager;
+import com.flyaway.deathchest.managers.MessageManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,27 +22,24 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
     private final DeathChest plugin;
     private final ConfigManager configManager;
     private final ChestManager chestManager;
-    private final MiniMessage miniMessage;
 
     public DeathChestCommand(DeathChest plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         this.chestManager = plugin.getChestManager();
-        this.miniMessage = MiniMessage.miniMessage();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Эта команда может быть использована только игроками.");
+            sender.sendMessage(MessageManager.buildMessage("player-only",
+                    "<red>Эта команда может быть использована только игроками."));
             return true;
         }
 
-        // Проверка разрешения deathchest.use
         if (!player.hasPermission("deathchest.use")) {
-            Component message = buildMessage("no-permission",
-                    "<red>У вас нет прав для использования этой команды");
-            player.sendMessage(message);
+            player.sendMessage(MessageManager.buildMessage("no-permission",
+                    "<red>У вас нет прав для использования этой команды"));
             return true;
         }
 
@@ -59,21 +56,19 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
             case "reload":
                 if (player.hasPermission("deathchest.reload")) {
                     plugin.reloadConfiguration();
-                    Component message = buildMessage("reload-success",
-                            "<green>Конфигурация перезагружена!");
-                    player.sendMessage(message);
+                    MessageManager.init(plugin);
+                    player.sendMessage(MessageManager.buildMessage("reload-success",
+                            "<green>Конфигурация перезагружена!"));
                 } else {
-                    Component message = buildMessage("no-permission",
-                            "<red>У вас нет прав для использования этой команды");
-                    player.sendMessage(message);
+                    player.sendMessage(MessageManager.buildMessage("no-permission",
+                            "<red>У вас нет прав для использования этой команды"));
                 }
                 break;
 
             case "version":
-                Component versionMessage = miniMessage.deserialize(
-                        configManager.getPrefix() + " <white>DeathChest v1.1.1"
-                );
-                player.sendMessage(versionMessage);
+                String version = plugin.getPluginMeta().getVersion();
+                player.sendMessage(MessageManager.buildMessage("version",
+                        "v" + version, Map.of("version", version)));
                 break;
 
             default:
@@ -85,12 +80,7 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(Player player) {
-        Component header = miniMessage.deserialize("<gradient:gold:white>=== Команды DeathChest ===");
-        player.sendMessage(header);
-        player.sendMessage(miniMessage.deserialize("<white>/deathchest list <gray>- Показать ваши сундуки смерти"));
-        player.sendMessage(miniMessage.deserialize("<white>/deathchest reload <gray>- Перезагрузить конфигурацию (требуются права)"));
-        player.sendMessage(miniMessage.deserialize("<white>/deathchest version <gray>- Показать версию плагина"));
-        player.sendMessage(miniMessage.deserialize("<white>/deathchest help <gray>- Показать эту справку"));
+        player.sendMessage(MessageManager.buildRawMessage("help", "<red>help-msg not found", null));
     }
 
     private void listChests(Player player) {
@@ -103,11 +93,10 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
 
             if (chest.getOwner().equals(player.getUniqueId())) {
                 String world = location.getWorld().getName();
-                int x = location.getBlockX();
-                int y = location.getBlockY();
-                int z = location.getBlockZ();
+                String x = String.valueOf(location.getBlockX());
+                String y = String.valueOf(location.getBlockY());
+                String z = String.valueOf(location.getBlockZ());
 
-                // Calculate time since creation
                 Duration duration = Duration.between(
                         Instant.ofEpochMilli(chest.getCreationTime()),
                         Instant.now()
@@ -115,29 +104,21 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
 
                 String timeAgo = formatDuration(duration);
 
-                Component chestInfo = miniMessage.deserialize(
-                        "<yellow>Мир: <white>" + world +
-                                " <yellow>X: <white>" + x +
-                                " <yellow>Y: <white>" + y +
-                                " <yellow>Z: <white>" + z +
-                                " <gray>(" + timeAgo + " назад)"
-                );
-                playerChests.add(chestInfo);
+                playerChests.add(MessageManager.buildRawMessage("list-format",
+                        "<red>list-format not found", Map.of(
+                                "world", world, "x", x, "y", y, "z", z, "time", timeAgo)));
             }
         }
 
         if (playerChests.isEmpty()) {
-            Component message = buildMessage("no-chests",
-                    "<green>У вас нет активных сундуков смерти");
-            player.sendMessage(message);
+            player.sendMessage(MessageManager.buildMessage("no-chests", "<green>У вас нет активных сундуков смерти"));
         } else {
-            Component header = miniMessage.deserialize("<gradient:gold:white>=== Ваши сундуки смерти ===");
-            player.sendMessage(header);
+            player.sendMessage(MessageManager.buildRawMessage("list-header",
+                    "<gradient:gold:white>=== Ваши сундуки смерти ===</gradient>", null));
             for (int i = 0; i < playerChests.size(); i++) {
-                Component numberedEntry = miniMessage.deserialize(
-                        "<white>" + (i + 1) + ". "
-                ).append(playerChests.get(i));
-                player.sendMessage(numberedEntry);
+                player.sendMessage(MessageManager.buildRawMessage("list-numbered",
+                        "<white>" + (i + 1) + ". ", Map.of("number", String.valueOf(i + 1))
+                ).append(playerChests.get(i)));
             }
         }
     }
@@ -148,16 +129,16 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
         long minutes = duration.toMinutes() % 60;
 
         if (days > 0) {
-            return String.format("%d %s и %d %s",
-                    days, days == 1 ? "день" : "дней",
-                    hours, hours == 1 ? "час" : "часов");
+            return String.format("%d %s, %d %s",
+                    days, configManager.getTimeAgo("days"),
+                    hours, configManager.getTimeAgo("hours"));
         } else if (hours > 0) {
-            return String.format("%d %s и %d %s",
-                    hours, hours == 1 ? "час" : "часов",
-                    minutes, minutes == 1 ? "минута" : "минут");
+            return String.format("%d %s, %d %s",
+                    hours, configManager.getTimeAgo("hours"),
+                    minutes, configManager.getTimeAgo("minutes"));
         } else {
             return String.format("%d %s",
-                    minutes, minutes == 1 ? "минута" : "минут");
+                    minutes, configManager.getTimeAgo("minutes"));
         }
     }
 
@@ -175,18 +156,5 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
         }
 
         return completions;
-    }
-
-    /**
-     * Строит компонент сообщения с префиксом
-     */
-    private Component buildMessage(String messageKey, String defaultMessage) {
-        String message = configManager.getMessage(messageKey, defaultMessage);
-        String prefix = configManager.getPrefix();
-
-        // Объединяем префикс и сообщение
-        String fullMessage = prefix + " " + message;
-
-        return miniMessage.deserialize(fullMessage);
     }
 }
