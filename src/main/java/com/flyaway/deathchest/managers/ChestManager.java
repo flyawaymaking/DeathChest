@@ -1,6 +1,7 @@
 package com.flyaway.deathchest.managers;
 
 import com.flyaway.deathchest.DeathChest;
+import eu.decentsoftware.holograms.api.DHAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -352,11 +353,14 @@ public class ChestManager {
 
                 chest.getInventory().setContents(clonedItems.toArray(new ItemStack[0]));
                 deathChests.put(loc, chest);
-                if (plugin.getConfigManager().isHoloEnabled() && chest.getHologramId() == null) {
-                    String newHologramId = plugin.getHologramManager().createHologram(loc, ownerName);
-                    chest.setHologramId(newHologramId);
-                    saveDeathChest(chest);
+                if (plugin.getConfigManager().isHoloEnabled()) {
+                    if (chest.getHologramId() == null || DHAPI.getHologram(chest.getHologramId()) == null) {
+                        String newHologramId = plugin.getHologramManager().createHologram(loc, ownerName);
+                        chest.setHologramId(newHologramId);
+                        saveDeathChest(chest);
+                    }
                 }
+
             } catch (Exception e) {
                 plugin.getLogger().warning("Ошибка при загрузке сундука смерти: " + key + " - " + e.getMessage());
             }

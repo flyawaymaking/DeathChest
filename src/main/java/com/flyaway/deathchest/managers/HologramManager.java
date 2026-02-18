@@ -48,8 +48,10 @@ public class HologramManager {
 
         if (holoLines.isEmpty()) return null;
 
-        Hologram hologram = DHAPI.createHologram(id, holoLoc, holoLines);
-        hologram.showAll();
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            Hologram hologram = DHAPI.createHologram(id, holoLoc, holoLines);
+            hologram.showAll();
+        });
 
         return id;
     }
@@ -108,10 +110,12 @@ public class HologramManager {
                 continue;
             }
 
-            if (chest.getHologramId() == null && plugin.getConfigManager().isHoloEnabled()) {
-                String hologramId = createHologram(location, chest.getOwnerName());
-                chest.setHologramId(hologramId);
-                restoredCount++;
+            if (plugin.getConfigManager().isHoloEnabled()) {
+                if (chest.getHologramId() == null || DHAPI.getHologram(chest.getHologramId()) == null) {
+                    String hologramId = createHologram(location, chest.getOwnerName());
+                    chest.setHologramId(hologramId);
+                    restoredCount++;
+                }
             }
         }
 
