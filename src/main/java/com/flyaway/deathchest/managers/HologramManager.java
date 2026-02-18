@@ -7,7 +7,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.Material;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,7 +77,6 @@ public class HologramManager {
     public void reload() {
         plugin.getLogger().info("Перезагрузка менеджера голограмм...");
 
-        // Проверяем доступность DecentHolograms
         boolean wasEnabled = isEnabled();
         checkDependency();
 
@@ -87,7 +85,6 @@ public class HologramManager {
             return;
         }
 
-        // Если плагин был только что включен, восстанавливаем все голограммы
         if (isEnabled() && !wasEnabled) {
             plugin.getLogger().info("DecentHolograms снова доступен - восстанавливаем голограммы...");
             restoreAllHolograms();

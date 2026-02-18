@@ -7,7 +7,6 @@ import com.flyaway.deathchest.managers.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -27,6 +26,7 @@ public class DeathListener implements Listener {
     private final DeathChest plugin;
     private final ConfigManager configManager;
     private final ChestManager chestManager;
+
     public DeathListener(DeathChest plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
@@ -118,7 +118,7 @@ public class DeathListener implements Listener {
     private Location findChestLocation(Location deathLocation) {
         Location location = deathLocation.clone();
 
-        if (isSuitableForChest(location.getBlock())) {
+        if (chestManager.isSuitableForChest(location.getBlock())) {
             return location;
         }
 
@@ -126,7 +126,7 @@ public class DeathListener implements Listener {
             for (int z = -1; z <= 1; z++) {
                 for (int y = -2; y <= 2; y++) {
                     Location testLoc = location.clone().add(x, y, z);
-                    if (isSuitableForChest(testLoc.getBlock())) {
+                    if (chestManager.isSuitableForChest(testLoc.getBlock())) {
                         return testLoc;
                     }
                 }
@@ -134,21 +134,5 @@ public class DeathListener implements Listener {
         }
 
         return null;
-    }
-
-    private boolean isSuitableForChest(Block block) {
-        Material type = block.getType();
-        return type.isAir()
-                || type == Material.SHORT_GRASS
-                || type == Material.TALL_GRASS
-                || type == Material.FERN
-                || type == Material.LARGE_FERN
-                || type == Material.DEAD_BUSH
-                || type == Material.SEAGRASS
-                || type == Material.TALL_SEAGRASS
-                || type == Material.VINE
-                || type == Material.SNOW
-                || type == Material.WATER
-                || type == Material.LAVA;
     }
 }

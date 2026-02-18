@@ -24,6 +24,46 @@ public class ChestManager {
     private final Map<Location, InventoryTracker> openInventories;
     private final File chestsFile;
 
+    private static final Set<Material> SOFT_BLOCKS = EnumSet.of(
+            Material.SHORT_GRASS,
+            Material.TALL_GRASS,
+            Material.FERN,
+            Material.LARGE_FERN,
+            Material.DEAD_BUSH,
+            Material.PINK_PETALS,
+            Material.VINE,
+            Material.CAVE_VINES,
+            Material.CAVE_VINES_PLANT,
+            Material.WEEPING_VINES,
+            Material.WEEPING_VINES_PLANT,
+            Material.TWISTING_VINES,
+            Material.TWISTING_VINES_PLANT,
+            Material.HANGING_ROOTS,
+            Material.SEAGRASS,
+            Material.TALL_SEAGRASS,
+            Material.KELP,
+            Material.KELP_PLANT,
+            Material.SNOW,
+            Material.POWDER_SNOW,
+            Material.SCULK_VEIN,
+            Material.WATER,
+            Material.LAVA
+    );
+
+    static {
+        addOptional("SHORT_DRY_GRASS");
+        addOptional("TALL_DRY_GRASS");
+        addOptional("PALE_OAK_LEAVES");
+        addOptional("PALE_HANGING_MOSS");
+    } // Materials not exists in minecraft 1.21, but has on new versions
+
+    private static void addOptional(String name) {
+        Material mat = Material.matchMaterial(name);
+        if (mat != null) {
+            SOFT_BLOCKS.add(mat);
+        }
+    }
+
     public ChestManager(DeathChest plugin) {
         this.plugin = plugin;
         this.deathChests = new HashMap<>();
@@ -120,7 +160,7 @@ public class ChestManager {
         try {
             Block block = location.getBlock();
 
-            if (!block.getType().isAir() && block.getType() != Material.WATER && block.getType() != Material.LAVA) {
+            if (!isSuitableForChest(block)) {
                 return false;
             }
 
@@ -148,6 +188,11 @@ public class ChestManager {
             plugin.getLogger().warning("Не удалось создать сундук смерти для " + player.getName() + ": " + e.getMessage());
             return false;
         }
+    }
+
+    public boolean isSuitableForChest(Block block) {
+        Material type = block.getType();
+        return type.isAir() || SOFT_BLOCKS.contains(type);
     }
 
     public DeathChestData getDeathChest(Location location) {
