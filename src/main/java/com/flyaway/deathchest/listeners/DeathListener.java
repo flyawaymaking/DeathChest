@@ -7,7 +7,10 @@ import com.flyaway.deathchest.managers.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,27 +38,22 @@ public class DeathListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        if (event.getKeepInventory()) return;
+
         Player player = event.getEntity();
+
+        if (!player.hasPermission("deathchest.use")) return;
+        if (!shouldCreateDeathChest(player)) return;
+        if (!isWorldAllowed(player.getWorld().getName())) return;
+
         List<ItemStack> drops = new ArrayList<>();
-        for (ItemStack original : event.getDrops()) {
-            if (original != null && original.getType() != Material.AIR) {
-                drops.add(original.clone());
+        for (ItemStack item : event.getDrops()) {
+            if (item != null && item.getType() != Material.AIR) {
+                drops.add(item.clone());
             }
         }
 
-        if (!player.hasPermission("deathchest.use")) {
-            return;
-        }
-
         if (drops.isEmpty()) {
-            return;
-        }
-
-        if (!shouldCreateDeathChest(player)) {
-            return;
-        }
-
-        if (!isWorldAllowed(player.getWorld().getName())) {
             return;
         }
 

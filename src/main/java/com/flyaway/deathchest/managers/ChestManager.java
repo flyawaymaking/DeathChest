@@ -26,7 +26,6 @@ public class ChestManager {
     private final File chestsFile;
 
     private static final Set<Material> SOFT_BLOCKS = EnumSet.of(
-            Material.SHORT_GRASS,
             Material.TALL_GRASS,
             Material.FERN,
             Material.LARGE_FERN,
@@ -52,11 +51,15 @@ public class ChestManager {
     );
 
     static {
+        // GRASS - minecraft 1.20; SHORT_GRASS - minecraft 1.21
+        addOptional("GRASS");
+        addOptional("SHORT_GRASS");
+        // Materials not exists in minecraft 1.21, but has on new versions
         addOptional("SHORT_DRY_GRASS");
         addOptional("TALL_DRY_GRASS");
         addOptional("PALE_OAK_LEAVES");
         addOptional("PALE_HANGING_MOSS");
-    } // Materials not exists in minecraft 1.21, but has on new versions
+    }
 
     private static void addOptional(String name) {
         Material mat = Material.matchMaterial(name);

@@ -48,10 +48,8 @@ public class HologramManager {
 
         if (holoLines.isEmpty()) return null;
 
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
-            Hologram hologram = DHAPI.createHologram(id, holoLoc, holoLines);
-            hologram.showAll();
-        });
+        Hologram hologram = DHAPI.createHologram(id, holoLoc, holoLines);
+        hologram.showAll();
 
         return id;
     }
