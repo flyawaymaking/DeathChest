@@ -2,6 +2,8 @@
 
 A plugin for Minecraft servers that automatically creates a chest containing a player's items upon death.
 
+> The last version compatible with Java 21 is 1.3.2
+
 * Русский перевод конфига расположен [ЗДЕСЬ](/src/main/resources/ru_config.yml)
 
 ## 📦 Features
