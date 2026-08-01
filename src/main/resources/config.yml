@@ -1,73 +1,73 @@
 # DeathChest - Configuration
 
-# Настройки создания сундука
+# Chest creation settings
 chest-creation:
-  # Создавать сундук только при смерти от моба
+  # Create a chest only upon death by a mob
   mob-death-only: false
-  # Миры, где разрешены сундуки смерти (пусто = все миры)
+  # Worlds where death chests are allowed (empty = all worlds)
   allowed-worlds: [ ]
-  # Запрещенные миры, где сундуки смерти отключены
+  # Disabled worlds where death chests are turned off
   blacklisted-worlds: [ ]
 
-# Настройки взаимодействия с сундуком
+# Chest interaction settings
 chest-interactions:
-  # Могут ли игроки взаимодействовать с чужими сундуками смерти
+  # Can players interact with others' death chests
   allow-access-others-chests: true
-  # Могут ли игроки ломать сундук смерти
+  # Can players break a death chest
   player-breakable: true
-  # Защищен ли сундук от взрывов
+  # Is the chest protected from explosions
   explosion-proof: true
-  # Выпадают ли предметы при взрыве сундука
+  # Do items drop when the chest is exploded
   items-drop-when-exploded: true
-  # Выпадают ли предметы при разрушении сундука игроком
+  # Do items drop when the chest is broken by a player
   items-drop-when-broken: true
-  # Автоматически удалять пустые сундуки
+  # Automatically remove empty chests
   remove-empty-chests: true
 
-# Настройки внешнего вида сундука
+# Chest appearance settings
 chest-appearance:
-  # Пользовательский заголовок сундука (поддерживает MiniMessages)
-  title: "<gradient:gold:white>Сундук смерти:</gradient> <gold>{player}"
-  # Время истечения срока действия сундука в минутах (0 = никогда не истекает)
-  expiration-time: 1440  # По умолчанию 24 часа
-  # Отображать ли голограмму над сундуком (требуется DecentHolograms)
+  # Custom chest title (supports MiniMessages)
+  title: "<gradient:gold:white>Death Chest:</gradient> <gold>{player}"
+  # Chest expiration time in minutes (0 = never expires)
+  expiration-time: 1440  # Default 24 hours
+  # Display hologram above chest (requires DecentHolograms)
   hologram-enabled: true
-  # Не поддерживает MiniMessages, нужно использовать цвета https://wiki.decentholograms.eu/general/format-and-colors/colors/
+  # Does not support MiniMessages, use colors from https://wiki.decentholograms.eu/general/format-and-colors/colors/
   hologram:
-    - "<#800000>☠ <#FFD700>Сундук смерти </#FFFFFF><#800000>☠"
-    - "<#FFD700>Игрока: <#FFFFFF>{owner}"
+    - "<#800000>☠ <#FFD700>Death Chest </#FFFFFF><#800000>☠"
+    - "<#FFD700>Player: <#FFFFFF>{owner}"
 
-# Перевод для времени
+# Time translation
 time-ago:
-  days: "дней"
-  hours: "часов"
-  minutes: "минут"
+  days: "days"
+  hours: "hours"
+  minutes: "minutes"
 
-# Префикс сообщений (поддерживает MiniMessages)
+# Message prefix (supports MiniMessages)
 prefix: "<gradient:gold:white>[DeathChest]</gradient>"
 
-# Сообщения (поддерживает MiniMessages)
+# Messages (supports MiniMessages)
 messages:
-  # команды
-  player-only: "<red>Эта команда может быть использована только игроками."
-  no-permission: "<red>У вас нет прав для использования этой команды"
+  # commands
+  player-only: "<red>This command can only be used by players."
+  no-permission: "<red>You do not have permission to use this command"
   help: |
-    <gradient:gold:white>=== Команды DeathChest ===
-    <white>/deathchest list <gray>- Показать ваши сундуки смерти
-    <white>/deathchest reload <gray>- Перезагрузить конфигурацию (требуются права)
-    <white>/deathchest version <gray>- Показать версию плагина
-    <white>/deathchest help <gray>- Показать эту справку
+    <gradient:gold:white>=== DeathChest Commands ===
+    <white>/deathchest list <gray>- List your death chests
+    <white>/deathchest reload <gray>- Reload configuration (requires permission)
+    <white>/deathchest version <gray>- Show plugin version
+    <white>/deathchest help <gray>- Show this help
   version: "<white>DeathChest <yellow>v{version}"
-  list-header: "<gradient:gold:white>=== Ваши сундуки смерти ===</gradient>"
-  list-format: "<yellow>Мир: <white>{world} <yellow>X: <white>{x} <yellow>Y: <white>{y} <yellow>Z: <white>{z} <gray>({time} назад)"
+  list-header: "<gradient:gold:white>=== Your Death Chests ===</gradient>"
+  list-format: "<yellow>World: <white>{world} <yellow>X: <white>{x} <yellow>Y: <white>{y} <yellow>Z: <white>{z} <gray>({time} ago)"
   list-numbered: "<white>{number}. "
-  no-chests: "<green>У вас нет активных сундуков смерти"
-  reload-success: "<green>Конфигурация перезагружена!"
-  # слушатели
-  chest-created: "<white>Ваш сундук смерти создан на координатах: <yellow>X: {x} Y: {y} Z: {z}."
-  chest-accessed: "<white>Вы открываете сундук смерти игрока: <yellow>{player}."
-  access-denied: "<red>Этот сундук смерти принадлежит игроку: <yellow>{player}."
-  cannot-break: "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы!"
-  chest-removed: "<green>Сундук смерти исчез, так как вы забрали все предметы."
-  chest-broken-own: "<white>Вы сломали свой сундук смерти."
-  chest-broken-other: "<white>Вы сломали сундук смерти игрока <yellow>{player}."
+  no-chests: "<green>You have no active death chests"
+  reload-success: "<green>Configuration reloaded!"
+  # listeners
+  chest-created: "<white>Your death chest was created at coordinates: <yellow>X: {x} Y: {y} Z: {z}."
+  chest-accessed: "<white>You are opening the death chest of player: <yellow>{player}."
+  access-denied: "<red>This death chest belongs to player: <yellow>{player}."
+  cannot-break: "<red>You cannot break this death chest while it contains items!"
+  chest-removed: "<green>The death chest disappeared because you took all items."
+  chest-broken-own: "<white>You broke your own death chest."
+  chest-broken-other: "<white>You broke the death chest of player <yellow>{player}."

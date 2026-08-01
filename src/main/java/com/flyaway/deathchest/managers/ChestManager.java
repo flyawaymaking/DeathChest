@@ -59,6 +59,8 @@ public class ChestManager {
         addOptional("TALL_DRY_GRASS");
         addOptional("PALE_OAK_LEAVES");
         addOptional("PALE_HANGING_MOSS");
+        // Added in minecraft 1.21.5
+        addOptional("LEAF_LITTER");
     }
 
     private static void addOptional(String name) {
@@ -168,7 +170,7 @@ public class ChestManager {
                 return false;
             }
 
-            block.setType(Material.CHEST);
+            block.setType(Material.CHEST, false);
 
             int size = Math.min(((items.size() + 8) / 9) * 9, 54);
             DeathChestData deathChest = new DeathChestData(plugin, player.getUniqueId(), player.getName(), size, location);
@@ -260,7 +262,7 @@ public class ChestManager {
         if (chest != null) {
             closeAllInventoriesForLocation(location);
 
-            location.getBlock().setType(Material.AIR);
+            location.getBlock().setType(Material.AIR, false);
 
             removeDeathChestFromFile(location);
 
@@ -331,7 +333,7 @@ public class ChestManager {
 
                 Block block = loc.getBlock();
                 if (block.getType() != Material.CHEST) {
-                    block.setType(Material.CHEST);
+                    block.setType(Material.CHEST, false);
                 }
 
                 UUID owner = UUID.fromString(config.getString(key + ".owner"));
@@ -397,7 +399,7 @@ public class ChestManager {
                     continue;
                 }
 
-                loc.getBlock().setType(Material.AIR);
+                loc.getBlock().setType(Material.AIR, false);
                 iterator.remove();
 
                 removeDeathChestFromFile(loc);

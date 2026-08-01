@@ -1,157 +1,159 @@
-# DeathChest - Плагин для сундуков смерти
+# DeathChest - Death Chest Plugin
 
-Плагин для Minecraft серверов, который автоматически создает сундук с вещами игрока после смерти.
+A plugin for Minecraft servers that automatically creates a chest containing a player's items upon death.
 
-## 📦 Функциональность
+* Русский перевод конфига расположен [ЗДЕСЬ](/src/main/resources/ru_config.yml)
 
-- **Автоматическое создание сундука** — при смерти игрока все его вещи помещаются в сундук
-- **Гибкая конфигурация** — множество настроек под разные потребности
-- **Защита сундуков** — взрывозащита, защита от огня и поршней
-- **Система разрешений** — гибкое управление доступом
-- **WorldGuard совместимость** — сундуки можно открывать на защищенных территориях
-- **Поддержка нескольких миров** — можно ограничить создание сундуков в определенных мирах
-- **Голограммы над сундуком** — отображается имя владельца (требуется DecentHolograms)
-- **Автоматическая очистка** — периодический таск удаляет просроченные сундуки
+## 📦 Features
 
-## ⚙️ Установка
+- **Automatic Chest Creation** – Upon death, all player items are placed into a chest
+- **Flexible Configuration** – Multiple settings for various needs
+- **Chest Protection** – Explosion, fire, and piston protection
+- **Permission System** – Flexible access management
+- **WorldGuard Compatibility** – Chests can be opened in protected regions
+- **Multi-World Support** – Can restrict chest creation in specific worlds
+- **Holograms Above Chest** – Displays the owner's name (requires DecentHolograms)
+- **Automatic Cleanup** – Periodic task removes expired chests
 
-1. Скачайте **последний релиз** из раздела [Releases](../../releases)
-2. Поместите `.jar` в папку `plugins/` вашего сервера
-3. Перезапустите сервер
-4. Настройте конфигурационный файл по вашему усмотрению
-5. Перезагрузите плагин командой `/dchest reload` или перезапустите сервер
+## ⚙️ Installation
 
-## 🎮 Команды
+1. Download the **latest version** from [Releases](../../releases)
+2. Place the `.jar` file into your server's `plugins/` folder
+3. Restart the server
+4. Configure the config file to your liking
+5. Reload the plugin with `/dchest reload` or restart the server
 
-```
-/deathchest list    - Показать ваши сундуки смерти
-/deathchest reload  - Перезагрузить конфигурацию и сундуки (требуются права)
-/deathchest version - Показать версию плагина
-/deathchest help    - Показать справку
-```
-
-Алиас: `/dchest`
-
-## 🔐 Разрешения
+## 🎮 Commands
 
 ```
-deathchest.use    - Основное разрешение на использование плагина (по умолчанию: true)
-deathchest.reload - Перезагрузка конфигурации и сундуков (по умолчанию: op)
-deathchest.admin  - Права администратора (по умолчанию: op)
-deathchest.*      - Все права плагина
+/deathchest list    – List your death chests
+/deathchest reload  – Reload configuration and chests (requires permission)
+/deathchest version – Show plugin version
+/deathchest help    – Show help
 ```
 
-## 📁 Конфигурация
+Alias: `/dchest`
 
-Файл `config.yml` автоматически создается при первом запуске:
+## 🔐 Permissions
+
+```
+deathchest.use    – Basic permission to use the plugin (default: true)
+deathchest.reload – Reload configuration and chests (default: op)
+deathchest.admin  – Administrator permissions (default: op)
+deathchest.*      – All plugin permissions
+```
+
+## 📁 Configuration
+
+The `config.yml` file is automatically created on first run:
 
 ```yaml
 # DeathChest - Configuration
 
-# Настройки создания сундука
+# Chest creation settings
 chest-creation:
-  # Создавать сундук только при смерти от моба
+  # Create a chest only upon death by a mob
   mob-death-only: false
-  # Миры, где разрешены сундуки смерти (пусто = все миры)
+  # Worlds where death chests are allowed (empty = all worlds)
   allowed-worlds: [ ]
-  # Запрещенные миры, где сундуки смерти отключены
+  # Disabled worlds where death chests are turned off
   blacklisted-worlds: [ ]
 
-# Настройки взаимодействия с сундуком
+# Chest interaction settings
 chest-interactions:
-  # Могут ли игроки взаимодействовать с чужими сундуками смерти
+  # Can players interact with others' death chests
   allow-access-others-chests: true
-  # Могут ли игроки ломать сундук смерти
+  # Can players break a death chest
   player-breakable: true
-  # Защищен ли сундук от взрывов
+  # Is the chest protected from explosions
   explosion-proof: true
-  # Выпадают ли предметы при взрыве сундука
+  # Do items drop when the chest is exploded
   items-drop-when-exploded: true
-  # Выпадают ли предметы при разрушении сундука игроком
+  # Do items drop when the chest is broken by a player
   items-drop-when-broken: true
-  # Автоматически удалять пустые сундуки
+  # Automatically remove empty chests
   remove-empty-chests: true
 
-# Настройки внешнего вида сундука
+# Chest appearance settings
 chest-appearance:
-  # Пользовательский заголовок сундука (поддерживает MiniMessages)
-  title: "<gradient:gold:white>Сундук смерти:</gradient> <gold>{player}"
-  # Время истечения срока действия сундука в минутах (0 = никогда не истекает)
-  expiration-time: 1440  # По умолчанию 24 часа
-  # Отображать ли голограмму над сундуком (требуется DecentHolograms)
+  # Custom chest title (supports MiniMessages)
+  title: "<gradient:gold:white>Death Chest:</gradient> <gold>{player}"
+  # Chest expiration time in minutes (0 = never expires)
+  expiration-time: 1440  # Default 24 hours
+  # Display hologram above chest (requires DecentHolograms)
   hologram-enabled: true
-  # Не поддерживает MiniMessages, нужно использовать цвета https://wiki.decentholograms.eu/general/format-and-colors/colors/
+  # Does not support MiniMessages, use colors from https://wiki.decentholograms.eu/general/format-and-colors/colors/
   hologram:
-    - "<#800000>☠ <#FFD700>Сундук смерти </#FFFFFF><#800000>☠"
-    - "<#FFD700>Игрока: <#FFFFFF>{owner}"
+    - "<#800000>☠ <#FFD700>Death Chest </#FFFFFF><#800000>☠"
+    - "<#FFD700>Player: <#FFFFFF>{owner}"
 
-# Перевод для времени
+# Time translation
 time-ago:
-  days: "дней"
-  hours: "часов"
-  minutes: "минут"
+  days: "days"
+  hours: "hours"
+  minutes: "minutes"
 
-# Префикс сообщений (поддерживает MiniMessages)
+# Message prefix (supports MiniMessages)
 prefix: "<gradient:gold:white>[DeathChest]</gradient>"
 
-# Сообщения (поддерживает MiniMessages)
+# Messages (supports MiniMessages)
 messages:
-  # команды
-  player-only: "<red>Эта команда может быть использована только игроками."
-  no-permission: "<red>У вас нет прав для использования этой команды"
+  # commands
+  player-only: "<red>This command can only be used by players."
+  no-permission: "<red>You do not have permission to use this command"
   help: |
-    <gradient:gold:white>=== Команды DeathChest ===
-    <white>/deathchest list <gray>- Показать ваши сундуки смерти
-    <white>/deathchest reload <gray>- Перезагрузить конфигурацию (требуются права)
-    <white>/deathchest version <gray>- Показать версию плагина
-    <white>/deathchest help <gray>- Показать эту справку
+    <gradient:gold:white>=== DeathChest Commands ===
+    <white>/deathchest list <gray>- List your death chests
+    <white>/deathchest reload <gray>- Reload configuration (requires permission)
+    <white>/deathchest version <gray>- Show plugin version
+    <white>/deathchest help <gray>- Show this help
   version: "<white>DeathChest <yellow>v{version}"
-  list-header: "<gradient:gold:white>=== Ваши сундуки смерти ===</gradient>"
-  list-format: "<yellow>Мир: <white>{world} <yellow>X: <white>{x} <yellow>Y: <white>{y} <yellow>Z: <white>{z} <gray>({time} назад)"
+  list-header: "<gradient:gold:white>=== Your Death Chests ===</gradient>"
+  list-format: "<yellow>World: <white>{world} <yellow>X: <white>{x} <yellow>Y: <white>{y} <yellow>Z: <white>{z} <gray>({time} ago)"
   list-numbered: "<white>{number}. "
-  no-chests: "<green>У вас нет активных сундуков смерти"
-  reload-success: "<green>Конфигурация перезагружена!"
-  # слушатели
-  chest-created: "<white>Ваш сундук смерти создан на координатах: <yellow>X: {x} Y: {y} Z: {z}."
-  chest-accessed: "<white>Вы открываете сундук смерти игрока: <yellow>{player}."
-  access-denied: "<red>Этот сундук смерти принадлежит игроку: <yellow>{player}."
-  cannot-break: "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы!"
-  chest-removed: "<green>Сундук смерти исчез, так как вы забрали все предметы."
-  chest-broken-own: "<white>Вы сломали свой сундук смерти."
-  chest-broken-other: "<white>Вы сломали сундук смерти игрока <yellow>{player}."
+  no-chests: "<green>You have no active death chests"
+  reload-success: "<green>Configuration reloaded!"
+  # listeners
+  chest-created: "<white>Your death chest was created at coordinates: <yellow>X: {x} Y: {y} Z: {z}."
+  chest-accessed: "<white>You are opening the death chest of player: <yellow>{player}."
+  access-denied: "<red>This death chest belongs to player: <yellow>{player}."
+  cannot-break: "<red>You cannot break this death chest while it contains items!"
+  chest-removed: "<green>The death chest disappeared because you took all items."
+  chest-broken-own: "<white>You broke your own death chest."
+  chest-broken-other: "<white>You broke the death chest of player <yellow>{player}."
 ```
 
-## 🔧 Особенности
+## 🔧 Specificity
 
-### Защита сундуков
-- **Взрывозащита** — сундуки защищены от взрывов (настраивается)
-- **Защита от огня** — сундуки не горят и не поджигаются
-- **Защита от поршней** — поршни не могут двигать сундуки смерти
-- **Доступ в регионах** — сундуки можно открывать даже на защищенных территориях WorldGuard
+### Chest Protection
+- **Explosion Protection** – Chests are protected from explosions (configurable)
+- **Fire Protection** – Chests do not burn or catch fire
+- **Piston Protection** – Pistons cannot move death chests
+- **Region Access** – Chests can be opened even in protected WorldGuard regions
 
-### Умное создание
-- **Поиск места** — плагин автоматически ищет подходящее место для сундука
-- **Проверка вещей** — если у игрока нет вещей, сундук не создается
-- **Фильтр по мирам** — можно ограничить создание сундуков в определенных мирах
+### Smart Creation
+- **Location Search** – The plugin automatically searches for a suitable place for the chest
+- **Item Check** – If a player has no items, a chest is not created
+- **World Filter** – Can restrict chest creation in specific worlds
 
-### Управление доступом
-- **Владельческие права** — только владелец может открывать свой сундук (настраивается)
-- **Разрешение на ломание** — можно настроить возможность ломать сундуки
-- **Авто-удаление** — пустые сундуки автоматически удаляются
-- **Голограммы** — отображается имя владельца над сундуком, если включено
+### Access Management
+- **Ownership Rights** – Only the owner can open their chest (configurable)
+- **Breaking Permission** – Ability to break chests can be configured
+- **Auto-Removal** – Empty chests are automatically removed
+- **Holograms** – Owner's name is displayed above the chest if enabled
 
-### Автоматическое управление
-- **Периодическая очистка** — просроченные сундуки удаляются автоматически
+### Automatic Management
+- **Periodic Cleanup** – Expired chests are automatically removed
 
-## 🐛 Багрепорты и поддержка
+## 🐛 Bug Reports and Support
 
-Если вы нашли ошибку или у вас есть предложения по улучшению плагина, создайте [issue](../../issues).
+If you find a bug or have suggestions for improving the plugin, please create an [issue](../../issues).
 
-## 📄 Лицензия
+## 📄 License
 
-Этот плагин распространяется под лицензией MIT. Вы можете свободно использовать, модифицировать и распространять его.
+This plugin is distributed under the MIT License. You are free to use, modify, and distribute it.
 
-## 🤝 Совместимость
+## 🤝 Compatibility
 
-- **Paper**: 1.20+ (кроме 1.20.5)
-- **Java**: 21
+- **Paper**: 1.20+ (except 1.20.5)
+- **Java**: 25
