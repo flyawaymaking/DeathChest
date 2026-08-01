@@ -4,12 +4,12 @@ A plugin for Minecraft servers that automatically creates a chest containing a p
 
 * Русский перевод конфига расположен [ЗДЕСЬ](/src/main/resources/ru_config.yml)
 
-## 🤝 Compatibility
+## 🧩 Version Compatibility
 
-- **Paper**: 1.20+ (except 1.20.5)
-- **Java**: 25
-
-> The last version compatible with Java 21 is 1.3.2
+| **Plugin version** | **Supported Paper** | **Java** |
+|--------------------|---------------------|----------|
+| `1.4.0`            | `1.20` – `26.2`     | 25       |
+| `1.3.2`            | `1.20` – `1.21.11`  | 21       |
 
 ## 📦 Features
 
