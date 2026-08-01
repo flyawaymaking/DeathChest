@@ -2,9 +2,14 @@
 
 A plugin for Minecraft servers that automatically creates a chest containing a player's items upon death.
 
-> The last version compatible with Java 21 is 1.3.2
-
 * Русский перевод конфига расположен [ЗДЕСЬ](/src/main/resources/ru_config.yml)
+
+## 🤝 Compatibility
+
+- **Paper**: 1.20+ (except 1.20.5)
+- **Java**: 25
+
+> The last version compatible with Java 21 is 1.3.2
 
 ## 📦 Features
 
@@ -14,7 +19,7 @@ A plugin for Minecraft servers that automatically creates a chest containing a p
 - **Permission System** – Flexible access management
 - **WorldGuard Compatibility** – Chests can be opened in protected regions
 - **Multi-World Support** – Can restrict chest creation in specific worlds
-- **Holograms Above Chest** – Displays the owner's name (requires DecentHolograms)
+- **Holograms Above Chest** – Displays the owner's name (requires [DecentHolograms](https://github.com/DecentSoftware-eu/DecentHolograms))
 - **Automatic Cleanup** – Periodic task removes expired chests
 
 ## ⚙️ Installation
@@ -154,8 +159,3 @@ If you find a bug or have suggestions for improving the plugin, please create an
 ## 📄 License
 
 This plugin is distributed under the MIT License. You are free to use, modify, and distribute it.
-
-## 🤝 Compatibility
-
-- **Paper**: 1.20+ (except 1.20.5)
-- **Java**: 25
