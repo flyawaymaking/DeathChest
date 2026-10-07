@@ -33,13 +33,13 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(MessageManager.buildMessage("player-only",
-                    "<red>Эта команда может быть использована только игроками."));
+                    "<red>This command can only be used by players."));
             return true;
         }
 
         if (!player.hasPermission("deathchest.use")) {
             player.sendMessage(MessageManager.buildMessage("no-permission",
-                    "<red>У вас нет прав для использования этой команды"));
+                    "<red>You do not have permission to use this command"));
             return true;
         }
 
@@ -58,10 +58,10 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
                     plugin.reloadConfiguration();
                     MessageManager.init(plugin);
                     player.sendMessage(MessageManager.buildMessage("reload-success",
-                            "<green>Конфигурация перезагружена!"));
+                            "<green>Configuration reloaded!"));
                 } else {
                     player.sendMessage(MessageManager.buildMessage("no-permission",
-                            "<red>У вас нет прав для использования этой команды"));
+                            "<red>You do not have permission to use this command"));
                 }
                 break;
 
@@ -111,10 +111,10 @@ public class DeathChestCommand implements CommandExecutor, TabCompleter {
         }
 
         if (playerChests.isEmpty()) {
-            player.sendMessage(MessageManager.buildMessage("no-chests", "<green>У вас нет активных сундуков смерти"));
+            player.sendMessage(MessageManager.buildMessage("no-chests", "<green>You have no active death chests"));
         } else {
             player.sendMessage(MessageManager.buildRawMessage("list-header",
-                    "<gradient:gold:white>=== Ваши сундуки смерти ===</gradient>", null));
+                    "<gradient:gold:white>=== Your Death Chests ===</gradient>", null));
             for (int i = 0; i < playerChests.size(); i++) {
                 player.sendMessage(MessageManager.buildRawMessage("list-numbered",
                         "<white>" + (i + 1) + ". ", Map.of("number", String.valueOf(i + 1))

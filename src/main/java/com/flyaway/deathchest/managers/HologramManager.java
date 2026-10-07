@@ -24,9 +24,9 @@ public class HologramManager {
         this.enabled = plugin.getServer().getPluginManager().getPlugin("DecentHolograms") != null;
 
         if (isEnabled()) {
-            plugin.getLogger().info("DecentHolograms найден — поддержка голограмм активирована.");
+            plugin.getLogger().info("DecentHolograms found — support for holograms is activated.");
         } else {
-            plugin.getLogger().warning("DecentHolograms не найден — голограммы будут отключены.");
+            plugin.getLogger().warning("DecentHolograms not found — holograms will be disabled.");
         }
     }
 
@@ -75,21 +75,21 @@ public class HologramManager {
      * - Восстанавливает голограммы для всех активных сундуков
      */
     public void reload() {
-        plugin.getLogger().info("Перезагрузка менеджера голограмм...");
+        plugin.getLogger().info("Rebooting the Hologram Manager...");
 
         boolean wasEnabled = isEnabled();
         checkDependency();
 
         if (!isEnabled()) {
-            plugin.getLogger().warning("DecentHolograms не доступен - голограммы отключены");
+            plugin.getLogger().warning("DecentHolograms is not available - holograms are disabled");
             return;
         }
 
         if (isEnabled() && !wasEnabled) {
-            plugin.getLogger().info("DecentHolograms снова доступен - восстанавливаем голограммы...");
+            plugin.getLogger().info("DecentHolograms is available again - restoring holograms...");
             restoreAllHolograms();
         } else if (isEnabled()) {
-            plugin.getLogger().info("DecentHolograms доступен - голограммы активны");
+            plugin.getLogger().info("DecentHolograms is available - holograms are active");
         }
     }
 
@@ -118,7 +118,7 @@ public class HologramManager {
         }
 
         if (restoredCount > 0) {
-            plugin.getLogger().info("Восстановлено " + restoredCount + " голограмм для сундуков смерти");
+            plugin.getLogger().info("Restored " + restoredCount + " holograms for death chests");
         }
     }
 

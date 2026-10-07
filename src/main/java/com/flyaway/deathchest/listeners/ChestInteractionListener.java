@@ -55,14 +55,14 @@ public class ChestInteractionListener implements Listener {
 
         if (!player.hasPermission("deathchest.use")) {
             Component message = MessageManager.buildMessage("no-permission",
-                    "<red>У вас нет прав для использования этой команды");
+                    "<red>You do not have permission to use this command");
             player.sendMessage(message);
             return;
         }
 
         if (!chestManager.canAccessChest(player, deathChest)) {
             Component message = MessageManager.buildMessage("access-denied",
-                    "<red>Этот сундук смерти принадлежит игроку: {player}",
+                    "<red>This death chest belongs to player: <yellow>{player}",
                     Map.of("player", deathChest.getOwnerName()));
             player.sendMessage(message);
             return;
@@ -70,7 +70,7 @@ public class ChestInteractionListener implements Listener {
 
         if (!deathChest.getOwner().equals(player.getUniqueId())) {
             Component message = MessageManager.buildMessage("chest-accessed",
-                    "Вы открываете сундук смерти игрока: {player}",
+                    "You are opening the death chest of player: <yellow>{player}",
                     Map.of("player", deathChest.getOwnerName()));
             player.sendMessage(message);
         }
@@ -99,14 +99,14 @@ public class ChestInteractionListener implements Listener {
 
         if (!player.hasPermission("deathchest.use")) {
             Component message = MessageManager.buildMessage("no-permission",
-                    "<red>У вас нет прав для использования этой команды");
+                    "<red>You do not have permission to use this command");
             player.sendMessage(message);
             return;
         }
 
         if (!chestManager.canAccessChest(player, deathChest)) {
             Component message = MessageManager.buildMessage("access-denied",
-                    "<red>Этот сундук смерти принадлежит игроку: {player}",
+                    "<red>This death chest belongs to player: <yellow>{player}",
                     Map.of("player", deathChest.getOwnerName()));
             player.sendMessage(message);
             return;
@@ -116,11 +116,11 @@ public class ChestInteractionListener implements Listener {
             if (isInventoryEmpty(deathChest.getInventory())) {
                 chestManager.removeDeathChest(location);
                 Component message = MessageManager.buildMessage("chest-removed",
-                        "<green>Сундук смерти исчез, так как вы забрали все предметы");
+                        "<green>The death chest disappeared because you took all items");
                 player.sendMessage(message);
             } else {
                 Component message = MessageManager.buildMessage("cannot-break",
-                        "<red>Вы не можете сломать этот сундук смерти, пока в нём есть предметы");
+                        "<red>You cannot break this death chest while it contains items");
                 player.sendMessage(message);
             }
             return;
@@ -134,11 +134,11 @@ public class ChestInteractionListener implements Listener {
 
         if (deathChest.getOwner().equals(player.getUniqueId())) {
             Component message = MessageManager.buildMessage("chest-broken-own",
-                    "Вы сломали свой сундук смерти");
+                    "You broke your own death chest");
             player.sendMessage(message);
         } else {
             Component message = MessageManager.buildMessage("chest-broken-other",
-                    "Вы сломали сундук смерти игрока {player}",
+                    "You broke the death chest of player <yellow>{player}",
                     Map.of("player", deathChest.getOwnerName()));
             player.sendMessage(message);
         }
@@ -162,7 +162,7 @@ public class ChestInteractionListener implements Listener {
         if (configManager.removeEmptyChests() && isInventoryEmpty(inventory)) {
             chestManager.removeDeathChest(chestLocation);
             Component message = MessageManager.buildMessage("chest-removed",
-                    "<green>Сундук смерти исчез, так как вы забрали все предметы");
+                    "<green>The death chest disappeared because you took all items");
             player.sendMessage(message);
         } else {
             chestManager.unregisterOpenInventory(player, inventory);

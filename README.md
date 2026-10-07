@@ -8,7 +8,7 @@ A plugin for Minecraft servers that automatically creates a chest containing a p
 
 | **Plugin version** | **Supported Paper** | **Java** |
 |--------------------|---------------------|----------|
-| `1.4.0`            | `1.20` – `26.2`     | 25       |
+| `1.4.0+`           | `1.20` – `26.2`     | 25       |
 | `1.3.2`            | `1.20` – `1.21.11`  | 21       |
 
 ## 📦 Features

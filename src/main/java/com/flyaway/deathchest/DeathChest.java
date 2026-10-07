@@ -40,7 +40,7 @@ public class DeathChest extends JavaPlugin {
 
         runScheduledTask();
 
-        getLogger().info("DeathChest был включен!");
+        getLogger().info("DeathChest enabled!");
     }
 
     @Override
@@ -50,7 +50,7 @@ public class DeathChest extends JavaPlugin {
         }
 
         chestManager.disableChests();
-        getLogger().info("DeathChest был выключен!");
+        getLogger().info("DeathChest disabled!");
     }
 
     private void runScheduledTask() {
@@ -75,7 +75,7 @@ public class DeathChest extends JavaPlugin {
 
         runScheduledTask();
 
-        getLogger().info("Конфигурация DeathChest перезагружена!");
+        getLogger().info("DeathChest config reloaded!");
     }
 
     public static DeathChest getInstance() {

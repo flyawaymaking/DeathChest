@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.flyaway.deathchest'
-version = '1.4.0'
+version = '1.5.0'
 
 java {
     toolchain {
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:26.2.build.84-stable'
+    compileOnly 'io.papermc.paper:paper-api:26.2.build.132-stable'
     compileOnly 'com.github.decentsoftware-eu:decentholograms:2.10.1'
 }
 

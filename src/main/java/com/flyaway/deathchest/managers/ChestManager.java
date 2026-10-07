@@ -191,7 +191,7 @@ public class ChestManager {
             return true;
 
         } catch (Exception e) {
-            plugin.getLogger().warning("Не удалось создать сундук смерти для " + player.getName() + ": " + e.getMessage());
+            plugin.getLogger().warning("Failed to create a death chest for " + player.getName() + ": " + e.getMessage());
             return false;
         }
     }
@@ -290,7 +290,7 @@ public class ChestManager {
         try {
             config.save(chestsFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Не удалось сохранить сундук смерти: " + e.getMessage());
+            plugin.getLogger().severe("Couldn't save death chest: " + e.getMessage());
         }
     }
 
@@ -305,7 +305,7 @@ public class ChestManager {
         try {
             config.save(chestsFile);
         } catch (IOException e) {
-            plugin.getLogger().severe("Не удалось удалить сундук смерти из файла: " + e.getMessage());
+            plugin.getLogger().severe("Couldn't delete death chest from file: " + e.getMessage());
         }
     }
 
@@ -367,11 +367,11 @@ public class ChestManager {
                 }
 
             } catch (Exception e) {
-                plugin.getLogger().warning("Ошибка при загрузке сундука смерти: " + key + " - " + e.getMessage());
+                plugin.getLogger().warning("Error loading the Death Chest: " + key + " - " + e.getMessage());
             }
         }
 
-        plugin.getLogger().info("Загружено " + deathChests.size() + " сундуков смерти");
+        plugin.getLogger().info("Loaded " + deathChests.size() + " death chests");
     }
 
     public Map<Location, DeathChestData> getDeathChests() {
@@ -413,7 +413,7 @@ public class ChestManager {
         }
 
         if (removedCount > 0) {
-            plugin.getLogger().info("Удалено " + removedCount + " просроченных сундуков смерти");
+            plugin.getLogger().info("Removed " + removedCount + " expired death chests");
         }
     }
 
@@ -422,7 +422,7 @@ public class ChestManager {
     }
 
     public void disableChests() {
-        plugin.getLogger().info("Отключение сундуков смерти...");
+        plugin.getLogger().info("Death chests disabling...");
 
         for (DeathChestData data : deathChests.values()) {
             if (data.getHologramId() != null) {
@@ -432,12 +432,12 @@ public class ChestManager {
 
         deathChests.clear();
 
-        plugin.getLogger().info("Сундуки смерти успешно отключены.");
+        plugin.getLogger().info("Death chests successfully disabled.");
     }
 
     public void reloadChests() {
         disableChests();
         loadChests();
-        plugin.getLogger().info("Перезагрузка сундуков смерти завершена.");
+        plugin.getLogger().info("The reboot of the Death chests is complete.");
     }
 }

@@ -16,16 +16,27 @@ public class ConfigManager {
 
     public void loadConfig() {
         plugin.saveDefaultConfig();
-        this.config = plugin.getConfig();
+        config = plugin.getConfig();
+        mergeDefaults();
     }
 
     public void reloadConfig() {
         plugin.reloadConfig();
-        this.config = plugin.getConfig();
+        config = plugin.getConfig();
+        mergeDefaults();
+    }
+
+    private void mergeDefaults() {
+        config.options().copyDefaults(true);
+        plugin.saveConfig();
     }
 
     public boolean isMobDeathOnly() {
         return config.getBoolean("chest-creation.mob-death-only", false);
+    }
+
+    public boolean isAllowSolidBlockSpawn() {
+        return config.getBoolean("chest-creation.allow-solid-block-spawn", false);
     }
 
     public List<String> getAllowedWorlds() {
