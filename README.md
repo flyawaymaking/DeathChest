@@ -8,7 +8,7 @@ A plugin for Minecraft servers that automatically creates a chest containing a p
 
 | **Plugin version** | **Supported Paper** | **Java** |
 |--------------------|---------------------|----------|
-| `1.4.0+`           | `1.20` – `26.2`     | 25       |
+| `1.4.0+`           | `1.20` – `26.3`     | 25       |
 | `1.3.2`            | `1.20` – `1.21.11`  | 21       |
 
 ## 📦 Features
@@ -61,6 +61,8 @@ The `config.yml` file is automatically created on first run:
 chest-creation:
   # Create a chest only upon death by a mob
   mob-death-only: false
+  # Can a chest spawn instead of a solid block
+  allow-solid-block-spawn: false
   # Worlds where death chests are allowed (empty = all worlds)
   allowed-worlds: [ ]
   # Disabled worlds where death chests are turned off
